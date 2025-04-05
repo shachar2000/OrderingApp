@@ -39,7 +39,9 @@ jobs:
 
       - name: Create Infrastructures
         run: |
-          cd tf        
+          cd tf      
+          ls
+          cat region.eu-north-1.tfvars
           terraform init
           terraform apply -var-file region.eu-north-1.tfvars -auto-approve
           OrderAppServer1_ip=$(terraform output -raw OrderAppServer1_public_ip)
