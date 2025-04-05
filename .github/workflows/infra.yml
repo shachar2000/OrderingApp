@@ -31,10 +31,10 @@ jobs:
           cd tf
           printf "%s" "${{ secrets.TFVARS_SECRET }}" > region.eu-north-1.tfvars
           cat region.eu-north-1.tfvars
-          db_name=$(grep 'db_name' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}')
-          db_username=$(grep 'db_username' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}')
-          db_password=$(grep 'db_password' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}')
-          echo $db_name
+          db_name=$(grep 'db_name' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}' | sed 's/"//g')
+          db_username=$(grep 'db_username' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}' | sed 's/"//g')
+          db_password=$(grep 'db_password' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}' | sed 's/"//g')
+          echo $db_named
           echo $db_username
           echo $db_password
           echo "db_name=$db_name" >> $GITHUB_ENV
