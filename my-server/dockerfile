@@ -1,0 +1,23 @@
+#שימוש בתמונת בסיס
+FROM node:18
+
+# הגדרת תיקיית העבודה
+WORKDIR /app
+
+# העתקת קבצי התלויות והתקנה
+COPY package*.json ./
+RUN npm install
+
+#העתקת שאר הקבצים
+COPY . .
+
+#הגדרת איזור הזמן של הקונטיינר
+ENV TZ=Asia/Jerusalem
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+
+#פתיחת פורט להאזנה לאפליקציה
+EXPOSE 3000
+
+#הפקודה שרצה בזמן הפעלת הקונטיינר
+CMD [ "node", "server.js" ]

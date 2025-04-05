@@ -1,0 +1,41 @@
+---
+- name: Install and configure Docker with orderappserver container
+  hosts: OrderAppServer
+  become: true
+  tasks:
+
+    - name: Update apt package index
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull OrderAppServer Docker image
+      docker_image:
+        name: shacharavraham/orderappserver
+        source: pull
+
+    - name: Wait for 60 seconds
+      pause:
+        seconds: 60
+
+    - name: Run the frontend container
+      docker_container:
+        name: orderappserver
+        image: shacharavraham/orderappserver:latest
+        state: started
+        restart_policy: always
+        exposed_ports:
+          - "3000"
+        published_ports:
+          - "3000:3000"
