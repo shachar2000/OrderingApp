@@ -10,12 +10,20 @@ variable "vpc_name" {
    type        = string
 }
 
+variable "cidr" {
+   description = "cidr"
+   type        = string
+}
 
 variable "azs" {
   description = "List of Availability Zones"
   type        = list(string)
 }
 
+variable "public_subnets" {
+  description = "List of CIDR blocks for public subnets"
+  type        = list(string)
+}
 
 # RdsSecurityGroup variables
 variable "Rds_security_group_name" {
@@ -26,6 +34,16 @@ variable "Rds_security_group_name" {
 variable "Rds_port" {
   description = "The port for RDS"
   type        = number
+}
+
+variable "Rds_ingress_cidr_blocks" {
+  description = "List of CIDR blocks for ingress rule"
+  type        = list(string)
+}
+
+variable "Rds_egress_cidr_blocks" {
+  description = "List of CIDR blocks for egress rule"
+  type        = list(string)
 }
 
 # aws_db_subnet_group variables
@@ -71,6 +89,11 @@ variable "engine" {
   type        = string
 }
 
+variable "engine_version" {
+  description = "The version of the engine for the RDS instance"
+  type        = string
+}
+
 variable "instance_class" {
   description = "The instance class for the RDS instance"
   type        = string
@@ -105,6 +128,16 @@ variable "alb_sg_name" {
 variable "alb_ingress_ports" {
   description = "List of ingress ports for the ALB"
   type        = list(number)
+}
+
+variable "alb_ingress_cidr_blocks" {
+  description = "List of CIDR blocks for ALB ingress rules"
+  type        = list(string)
+}
+
+variable "alb_egress_cidr_blocks" {
+  description = "List of CIDR blocks for ALB egress rules"
+  type        = list(string)
 }
 
 # LoadBalancer variables
@@ -145,6 +178,11 @@ variable "domain_name" {
   type        = string
 }
 
+variable "subject_alternative_names" {
+  description = "List of Subject Alternative Names (SANs) for the certificate"
+  type        = list(string)
+}
+
 # aws_lb_listener variables
 variable "lb_listener_port" {
   description = "The port on which the ALB listener listens"
@@ -170,6 +208,16 @@ variable "EC2_sg_name" {
 variable "sg_ingress_ports" {
   description = "List of ingress ports for the ALB"
   type        = list(number)
+}
+
+variable "sg_ingress_cidr_blocks" {
+  description = "List of CIDR blocks for ALB ingress rules"
+  type        = list(string)
+}
+
+variable "sg_egress_cidr_blocks" {
+  description = "List of CIDR blocks for ALB egress rules"
+  type        = list(string)
 }
 
 # aws_instance variables
