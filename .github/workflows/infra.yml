@@ -34,9 +34,9 @@ jobs:
           db_name=$(grep 'db_name' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}')
           db_username=$(grep 'db_username' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}')
           db_password=$(grep 'db_password' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}')
-          cat db_name
-          cat db_username
-          cat db_password
+          echo $db_name
+          echo $db_username
+          echo $db_password
           echo "db_name=$db_name" >> $GITHUB_ENV
           echo "db_username=$db_username" >> $GITHUB_ENV
           echo "db_password=$db_password" >> $GITHUB_ENV
