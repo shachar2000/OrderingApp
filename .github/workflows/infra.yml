@@ -30,6 +30,7 @@ jobs:
         run: |
           cd tf
           echo "${{ secrets.TFVARS_SECRET }}" > region.eu-north-1.tfvars
+          cat region.eu-north-1.tfvars
           db_name=$(echo "${{ secrets.TFVARS_SECRET }}" | grep 'db_name' | sed -E 's/.*db_name\s*=\s*"([^"]+)".*/\1/')
           db_username=$(echo "${{ secrets.TFVARS_SECRET }}" | grep 'db_username' | sed -E 's/.*db_username\s*=\s*"([^"]+)".*/\1/')
           db_password=$(echo "${{ secrets.TFVARS_SECRET }}" | grep 'db_password' | sed -E 's/.*db_password\s*=\s*"([^"]+)".*/\1/')
