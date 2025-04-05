@@ -24,10 +24,10 @@ module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
   name = var.vpc_name
-  cidr = var.cidr
+  cidr = "10.0.0.0/16"
 
   azs             = var.azs
-  public_subnets  = var.public_subnets
+  public_subnets  = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
 resource "aws_security_group" "RdsSecurityGroup" {
@@ -39,14 +39,14 @@ resource "aws_security_group" "RdsSecurityGroup" {
     from_port   = var.Rds_port
     to_port     = var.Rds_port
     protocol    = "tcp"
-    cidr_blocks = var.Rds_ingress_cidr_blocks
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = var.Rds_egress_cidr_blocks
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -68,7 +68,7 @@ resource "aws_db_instance" "OrderAppRds" {
   allocated_storage    = var.allocated_storage
   storage_type         = var.storage_type
   engine               = var.engine
-  engine_version       = var.engine_version
+  engine_version       = "8.0.40"
   instance_class       = var.instance_class
   parameter_group_name = var.parameter_group_name
   multi_az             = var.multi_az
@@ -92,28 +92,28 @@ resource "aws_security_group" "alb_OrderApp_sg" {
     from_port   = var.alb_ingress_ports[0]
     to_port     = var.alb_ingress_ports[0]
     protocol    = "tcp"
-    cidr_blocks = var.alb_ingress_cidr_blocks
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     from_port   = var.alb_ingress_ports[1]
     to_port     = var.alb_ingress_ports[1]
     protocol    = "tcp"
-    cidr_blocks = var.alb_ingress_cidr_blocks
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     from_port   = var.alb_ingress_ports[2]
     to_port     = var.alb_ingress_ports[2]
     protocol    = "tcp"
-    cidr_blocks = var.alb_ingress_cidr_blocks
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = var.alb_egress_cidr_blocks
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -143,7 +143,7 @@ resource "aws_lb_target_group" "OrderApp_target_group" {
 resource "aws_acm_certificate" "certificate_manager" {
   domain_name       = var.domain_name
   validation_method = "DNS"
-  subject_alternative_names = var.subject_alternative_names
+  subject_alternative_names = ["*.shachar.online"]
 }
 
 resource "aws_route53_record" "cert_validation_record1" {
@@ -195,35 +195,35 @@ resource "aws_security_group" "instance_sg" {
     from_port   = var.sg_ingress_ports[0]
     to_port     = var.sg_ingress_ports[0]
     protocol    = "tcp"
-    cidr_blocks = var.sg_ingress_cidr_blocks
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     from_port   = var.sg_ingress_ports[1]
     to_port     = var.sg_ingress_ports[1]
     protocol    = "tcp"
-    cidr_blocks = var.sg_ingress_cidr_blocks
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     from_port              = var.sg_ingress_ports[2]
     to_port                = var.sg_ingress_ports[2]
     protocol               = "tcp"
-    cidr_blocks = var.sg_ingress_cidr_blocks
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     from_port   = var.sg_ingress_ports[3]
     to_port     = var.sg_ingress_ports[3]
     protocol    = "tcp"
-    cidr_blocks = var.sg_ingress_cidr_blocks
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = var.sg_egress_cidr_blocks
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
