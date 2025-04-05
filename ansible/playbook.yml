@@ -39,3 +39,8 @@
           - "3000"
         published_ports:
           - "3000:3000"
+        env:
+          RDS_ENDPOINT: "{{ lookup('env', 'RdsEndpoint') }}"
+          RDS_USER: "{{ lookup('env', 'RDS_USER') }}"
+          RDS_PASSWORD: "{{ lookup('env', 'RDS_PASSWORD') }}"
+          RDS_NAME: "{{ lookup('env', 'RDS_NAME') }}"

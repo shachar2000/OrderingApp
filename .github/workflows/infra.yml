@@ -1,0 +1,77 @@
+name: Infrastructures Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo code
+        uses: actions/checkout@v2
+
+      - name: Install TF
+        run: |
+          wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt update && sudo apt install terraform
+          terraform -v
+
+      - name: Configure AWS credentials
+        run: |
+          aws configure set aws_access_key_id "${{secrets.AWS_ACCESS_KEY_ID}}"
+          aws configure set aws_secret_access_key "${{secrets.AWS_SECRET_ACCESS_KEY}}"
+          aws configure set region "${{secrets.AWS_SECRET_REGION}}"
+
+
+      - name: Create tfvars file
+        run: |
+          cd tf
+          echo "$TFVARS_SECRET" > region.eu-north-1.tfvars
+          db_name=$(echo "$TFVARS_SECRET" | grep 'db_name' | sed -E 's/.*db_name\s*=\s*"([^"]+)".*/\1/')
+          db_username=$(echo "$TFVARS_SECRET" | grep 'db_username' | sed -E 's/.*db_username\s*=\s*"([^"]+)".*/\1/')
+          db_password=$(echo "$TFVARS_SECRET" | grep 'db_password' | sed -E 's/.*db_password\s*=\s*"([^"]+)".*/\1/')
+          echo "db_name=$db_name" >> $GITHUB_ENV
+          echo "db_username=$db_username" >> $GITHUB_ENV
+          echo "db_password=$db_password" >> $GITHUB_ENV
+
+      - name: Create Infrastructures
+        run: |
+          terraform init
+          terraform apply -var-file region.eu-north-1.tfvars -auto-approve
+          OrderAppServer1_ip=$(terraform output -raw OrderAppServer1_public_ip)
+          OrderAppServer2_ip=$(terraform output -raw OrderAppServer2_public_ip)
+          RdsEndpoint=$(terraform output -raw rds_endpoint)
+          echo "OrderAppServer1_ip=$OrderAppServer1_ip" >> $GITHUB_ENV
+          echo "OrderAppServer2_ip=$OrderAppServer2_ip" >> $GITHUB_ENV
+          echo "RdsEndpoint=$RdsEndpoint" >> $GITHUB_ENV
+
+      - name: Create inventory file from output
+        run: |
+          cd ansible
+          touch inventory.txt
+          echo "[OrderAppServer]" > inventory.txt
+          echo "OrderAppServer1 ansible_host=$OrderAppServer1_ip ansible_user=ubuntu" >> inventory.txt
+          echo "OrderAppServer2 ansible_host=$OrderAppServer2_ip ansible_user=ubuntu" >> inventory.txt
+          cat inventory.txt
+
+      - name: Install Ansible
+        run: |
+          sudo apt update && sudo apt upgrade -y
+          sudo apt install software-properties-common
+          sudo add-apt-repository --yes --update ppa:ansible/ansible
+          sudo apt install ansible -y
+          ansible --version
+
+      - name: Run Ansible Playbook
+        run: |
+          cd ansible
+          echo "${{secrets.KEY_PEM}}" > ServerKeyPair.pem
+          sudo chmod 400 ServerKeyPair.pem
+          ssh -o StrictHostKeyChecking=no -i ServerKeyPair.pem ubuntu@$OrderAppServer1_ip "whoami"
+          ssh -o StrictHostKeyChecking=no -i ServerKeyPair.pem ubuntu@$OrderAppServer2_ip "whoami"
+          ansible-inventory -i inventory.txt --list
+          ls
+          ansible-playbook -i inventory.txt --private-key ServerKeyPair.pem playbook.yml
