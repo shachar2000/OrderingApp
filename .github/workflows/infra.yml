@@ -46,6 +46,7 @@ jobs:
           OrderAppServer1_ip=$(terraform output -raw OrderAppServer1_public_ip)
           OrderAppServer2_ip=$(terraform output -raw OrderAppServer2_public_ip)
           RdsEndpoint=$(terraform output -raw rds_endpoint)
+          RdsEndpoint=$(echo $RdsEndpoint | sed 's/:.*//')
           echo "OrderAppServer1_ip=$OrderAppServer1_ip" >> $GITHUB_ENV
           echo "OrderAppServer2_ip=$OrderAppServer2_ip" >> $GITHUB_ENV
           echo "RdsEndpoint=$RdsEndpoint" >> $GITHUB_ENV
