@@ -30,6 +30,8 @@ jobs:
         run: |
           cd tf
           echo "$TFVARS_SECRET" > region.eu-north-1.tfvars
+          ls
+          cat region.eu-north-1.tfvars
           db_name=$(echo "$TFVARS_SECRET" | grep 'db_name' | sed -E 's/.*db_name\s*=\s*"([^"]+)".*/\1/')
           db_username=$(echo "$TFVARS_SECRET" | grep 'db_username' | sed -E 's/.*db_username\s*=\s*"([^"]+)".*/\1/')
           db_password=$(echo "$TFVARS_SECRET" | grep 'db_password' | sed -E 's/.*db_password\s*=\s*"([^"]+)".*/\1/')
@@ -39,9 +41,7 @@ jobs:
 
       - name: Create Infrastructures
         run: |
-          cd tf      
-          ls
-          cat region.eu-north-1.tfvars
+          cd tf
           terraform init
           terraform apply -var-file region.eu-north-1.tfvars -auto-approve
           OrderAppServer1_ip=$(terraform output -raw OrderAppServer1_public_ip)
