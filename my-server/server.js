@@ -3,7 +3,7 @@ const app = express();
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = 'my_secret_key';
+const SECRET_KEY = process.env.SECRET_KEY;
 
 // התחברות לדטא בייס
 const connection = mysql.createConnection({

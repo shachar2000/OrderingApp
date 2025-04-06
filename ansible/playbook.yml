@@ -44,3 +44,4 @@
           RDS_USER: "{{ lookup('env', 'db_username') }}"
           RDS_PASSWORD: "{{ lookup('env', 'db_password') }}"
           RDS_NAME: "{{ lookup('env', 'db_name') }}"
+          SECRET_KEY: "{{ lookup('env', 'secret_key') }}"

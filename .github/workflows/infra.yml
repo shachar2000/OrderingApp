@@ -34,9 +34,12 @@ jobs:
           db_name=$(grep 'db_name' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}' | sed 's/"//g')
           db_username=$(grep 'db_username' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}' | sed 's/"//g')
           db_password=$(grep 'db_password' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}' | sed 's/"//g')
+          secret_key="${{ secrets.SECRET_KEY }}"
+          echo $secret_key
           echo $db_named
           echo $db_username
           echo $db_password
+          echo "secret_key=$secret_key" >> $GITHUB_ENV
           echo "db_name=$db_name" >> $GITHUB_ENV
           echo "db_username=$db_username" >> $GITHUB_ENV
           echo "db_password=$db_password" >> $GITHUB_ENV
