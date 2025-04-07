@@ -1,0 +1,30 @@
+name: Infrastructures Deployment
+
+on:
+  push:
+    paths:
+      - 'my-server/**'
+    branches:
+      - main
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo code
+        uses: actions/checkout@v2
+
+      - name: Docker Login
+        run: |
+          username="shacharavraham"
+          password="${{ secrets.DOCKER_HUB_PASSWORD }}"
+          docker login -u $username -p $password
+
+      - name: Build
+        run: |
+          docker build -t orderappserver .
+          docker tag orderappserver shacharavraham/orderappserver:latest
+
+      - name: Push
+        run: |
+          docker push shacharavraham/orderappserver:latest
