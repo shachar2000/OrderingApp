@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  Build And Push:
+  BuildAndPush:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo code

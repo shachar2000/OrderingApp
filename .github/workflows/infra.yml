@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  Infrastructures Deployment:
+  InfraDeployment:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo code
