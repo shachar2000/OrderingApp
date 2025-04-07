@@ -2,8 +2,8 @@ name: Infrastructures Deployment
 
 on:
   push:
-    paths:
-      - 'my-server/**'
+    #paths:
+    #  - 'my-server/**'
     branches:
       - main
 
