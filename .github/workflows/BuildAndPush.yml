@@ -16,7 +16,7 @@ jobs:
 
       - name: Docker Login
         run: |
-          username="shacharavraham"
+          username="shacharavraham123@gmail.com"
           password="${{ secrets.DOCKER_HUB_PASSWORD }}"
           docker login -u $username -p $password
 
