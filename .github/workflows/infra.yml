@@ -1,13 +1,12 @@
 name: Infrastructures Deployment
 
 on:
-  workflow_dispatch:
-  #push:
-  #  branches:
-  #    - main
+  push:
+    branches:
+      - main
 
 jobs:
-  Build:
+  Infrastructures Deployment:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo code
@@ -31,15 +30,10 @@ jobs:
         run: |
           cd tf
           printf "%s" "${{ secrets.TFVARS_SECRET }}" > region.eu-north-1.tfvars
-          cat region.eu-north-1.tfvars
           db_name=$(grep 'db_name' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}' | sed 's/"//g')
           db_username=$(grep 'db_username' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}' | sed 's/"//g')
           db_password=$(grep 'db_password' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}' | sed 's/"//g')
           secret_key="${{ secrets.SECRET_KEY }}"
-          echo $secret_key
-          echo $db_named
-          echo $db_username
-          echo $db_password
           echo "secret_key=$secret_key" >> $GITHUB_ENV
           echo "db_name=$db_name" >> $GITHUB_ENV
           echo "db_username=$db_username" >> $GITHUB_ENV
@@ -65,7 +59,6 @@ jobs:
           echo "[OrderAppServer]" > inventory.txt
           echo "OrderAppServer1 ansible_host=$OrderAppServer1_ip ansible_user=ubuntu" >> inventory.txt
           echo "OrderAppServer2 ansible_host=$OrderAppServer2_ip ansible_user=ubuntu" >> inventory.txt
-          cat inventory.txt
 
       - name: Install Ansible
         run: |
@@ -82,6 +75,4 @@ jobs:
           sudo chmod 400 ServerKeyPair.pem
           ssh -o StrictHostKeyChecking=no -i ServerKeyPair.pem ubuntu@$OrderAppServer1_ip "whoami"
           ssh -o StrictHostKeyChecking=no -i ServerKeyPair.pem ubuntu@$OrderAppServer2_ip "whoami"
-          ansible-inventory -i inventory.txt --list
-          ls
           ansible-playbook -i inventory.txt --private-key ServerKeyPair.pem playbook.yml

@@ -1,14 +1,14 @@
-name: Infrastructures Deployment
+name: Build And Push
 
 on:
   push:
-    #paths:
-    #  - 'my-server/**'
+    paths:
+      - 'my-server/**'
     branches:
       - main
 
 jobs:
-  Build:
+  Build And Push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo code
