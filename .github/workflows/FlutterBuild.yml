@@ -51,4 +51,7 @@ jobs:
         aws configure set region "${{ secrets.AWS_SECRET_REGION }}"
 
     - name: Upload APK to S3
-      run: aws s3 cp ordivo/build/app/outputs/flutter-apk/app-release.apk s3://${{ secrets
+      run: aws s3 cp ordivo/build/app/outputs/flutter-apk/app-release.apk s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/app-release.apk --acl public-read
+
+    - name: Upload zipped Linux build to S3
+      run: aws s3 cp ordivo/build/linux/x64/release/linux-release.zip s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/linux-release.zip --acl public-read
