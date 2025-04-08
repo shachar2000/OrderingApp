@@ -1,9 +1,10 @@
 name: Build & Upload Flutter App to S3
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Infrastructures Deployment"]
+    types:
+      - completed
 
 jobs:
   build-and-upload:
@@ -16,7 +17,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.29.2' # גרסה שמתאימה ל-Dart 3.3.x
+        flutter-version: '3.29.2'
 
     - name: Install dependencies
       run: |
@@ -62,7 +63,7 @@ jobs:
         aws configure set region "${{ secrets.AWS_SECRET_REGION }}"
 
     - name: Upload APK to S3
-      run: aws s3 cp ordivo/build/app/outputs/flutter-apk/app-release.apk s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/app-release.apk
+      run: aws s3 cp ordivo/build/app/outputs/flutter-apk/app-release.apk s3://my-flutter-app-bucket/flutter-builds/app-release.apk
 
     - name: Upload zipped Linux build to S3
-      run: aws s3 cp ordivo/build/linux/x64/release/linux-release.zip s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/linux-release.zip
+      run: aws s3 cp ordivo/build/linux/x64/release/linux-release.zip s3://my-flutter-app-bucket/flutter-builds/linux-release.zip

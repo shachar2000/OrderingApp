@@ -30,6 +30,31 @@ module "vpc" {
   public_subnets  = var.public_subnets
 }
 
+resource "aws_s3_bucket" "flutter_app_bucket" {
+  bucket = "my-flutter-app-bucket"
+}
+
+resource "aws_s3_bucket_acl" "flutter_app_acl" {
+  bucket = aws_s3_bucket.flutter_app_bucket.bucket
+  acl    = "public-read" 
+}
+
+resource "aws_s3_bucket_policy" "flutter_app_policy" {
+  bucket = aws_s3_bucket.flutter_app_bucket.bucket
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource  = "arn:aws:s3:::my-flutter-app-bucket/flutter-builds/*"
+      }
+    ]
+  })
+}
+
 resource "aws_security_group" "RdsSecurityGroup" {
   name        = var.Rds_security_group_name
   description = "Security group for OrderApp RDS instance"
