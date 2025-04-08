@@ -21,7 +21,18 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gtk+3.0 pkg-config
+        sudo apt-get install -y \
+          gtk+3.0 \
+          pkg-config \
+          libgtk-3-dev \
+          libcups2-dev \
+          libx11-dev \
+          libxkbfile-dev \
+          libsecret-1-dev \
+          libnss3-dev \
+          libxss1 \
+          libasound2-dev \
+          libssl-dev
 
     - name: Install dependencies And Generate App Icons
       run: |
