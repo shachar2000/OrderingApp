@@ -16,7 +16,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.19.6' # תואם ל־Dart 3.6.1, שנה אם אתה עם גרסה אחרת
+        flutter-version: '3.29.2' # גרסה שמתאימה ל-Dart 3.3.x
 
     - name: Install dependencies And Generate App Icons
       run: |
