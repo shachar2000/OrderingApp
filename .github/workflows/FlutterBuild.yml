@@ -35,20 +35,14 @@ jobs:
         cd build/linux/x64/release/
         zip -r linux-release.zip bundle
 
+    - name: Configure AWS credentials
+      run: |
+        aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
+        aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        aws configure set region "${{ secrets.AWS_SECRET_REGION }}"
+
     - name: Upload APK to S3
-      uses: aws-actions/s3cp@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        source: build/app/outputs/flutter-apk/app-release.apk
-        destination: s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/app-release.apk
-        flags: --acl public-read
+      run: aws s3 cp build/app/outputs/flutter-apk/app-release.apk s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/app-release.apk --acl public-read
 
     - name: Upload zipped Linux build to S3
-      uses: aws-actions/s3cp@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        source: build/linux/x64/release/linux-release.zip
-        destination: s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/linux-release.zip
-        flags: --acl public-read
+      run: aws s3 cp build/linux/x64/release/linux-release.zip s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/linux-release.zip --acl public-read
