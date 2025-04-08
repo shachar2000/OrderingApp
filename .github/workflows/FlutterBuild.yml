@@ -18,21 +18,25 @@ jobs:
       with:
         flutter-version: '3.19.6' # תואם ל־Dart 3.6.1, שנה אם אתה עם גרסה אחרת
 
-    - name: Install dependencies
-      run: flutter pub get
-
-    - name: Generate App Icons
-      run: flutter pub run flutter_launcher_icons:main
+    - name: Install dependencies And Generate App Icons
+      run: |
+        cd ordivo
+        flutter pub get
+        flutter pub run flutter_launcher_icons:main
 
     - name: Build APK
-      run: flutter build apk --release
+      run: |
+       cd ordivo
+       flutter build apk --release
 
     - name: Build Linux version
-      run: flutter build linux --release
+      run: |
+       cd ordivo
+       flutter build linux --release
 
     - name: Zip Linux build folder
       run: |
-        cd build/linux/x64/release/
+        cd ordivo/build/linux/x64/release/
         zip -r linux-release.zip bundle
 
     - name: Configure AWS credentials
@@ -42,7 +46,7 @@ jobs:
         aws configure set region "${{ secrets.AWS_SECRET_REGION }}"
 
     - name: Upload APK to S3
-      run: aws s3 cp build/app/outputs/flutter-apk/app-release.apk s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/app-release.apk --acl public-read
+      run: aws s3 cp ordivo/build/app/outputs/flutter-apk/app-release.apk s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/app-release.apk --acl public-read
 
     - name: Upload zipped Linux build to S3
-      run: aws s3 cp build/linux/x64/release/linux-release.zip s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/linux-release.zip --acl public-read
+      run: aws s3 cp ordivo/build/linux/x64/release/linux-release.zip s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/linux-release.zip --acl public-read
