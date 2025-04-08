@@ -1,0 +1,54 @@
+name: Build & Upload Flutter App to S3
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.19.6' # תואם ל־Dart 3.6.1, שנה אם אתה עם גרסה אחרת
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Generate App Icons
+      run: flutter pub run flutter_launcher_icons:main
+
+    - name: Build APK
+      run: flutter build apk --release
+
+    - name: Build Linux version
+      run: flutter build linux --release
+
+    - name: Zip Linux build folder
+      run: |
+        cd build/linux/x64/release/
+        zip -r linux-release.zip bundle
+
+    - name: Upload APK to S3
+      uses: aws-actions/s3cp@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        source: build/app/outputs/flutter-apk/app-release.apk
+        destination: s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/app-release.apk
+        flags: --acl public-read
+
+    - name: Upload zipped Linux build to S3
+      uses: aws-actions/s3cp@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        source: build/linux/x64/release/linux-release.zip
+        destination: s3://${{ secrets.AWS_S3_DOWNLOAD_BUCKET }}/flutter-builds/linux-release.zip
+        flags: --acl public-read
