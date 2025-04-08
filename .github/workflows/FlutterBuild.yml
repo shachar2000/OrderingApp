@@ -36,7 +36,7 @@ jobs:
         zip -r linux-release.zip bundle
 
     - name: Upload APK to S3
-      uses: aws-actions/s3cp@v1
+      uses: aws-actions/s3cp@v2
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -45,7 +45,7 @@ jobs:
         flags: --acl public-read
 
     - name: Upload zipped Linux build to S3
-      uses: aws-actions/s3cp@v1
+      uses: aws-actions/s3cp@v2
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
