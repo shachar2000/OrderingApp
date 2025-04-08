@@ -30,30 +30,37 @@ module "vpc" {
   public_subnets  = var.public_subnets
 }
 
-resource "aws_s3_bucket" "flutter_app_bucket" {
+resource "aws_s3_bucket" "my_bucket" {
   bucket = "my-flutter-app-bucket"
+  acl    = "private"
 }
 
-resource "aws_s3_bucket_acl" "flutter_app_acl" {
-  bucket = aws_s3_bucket.flutter_app_bucket.bucket
-  acl    = "public-read" 
+resource "aws_s3_bucket_public_access_block" "my_bucket_public_access_block" {
+  bucket = aws_s3_bucket.my_bucket.bucket
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
 }
 
-resource "aws_s3_bucket_policy" "flutter_app_policy" {
-  bucket = aws_s3_bucket.flutter_app_bucket.bucket
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect    = "Allow"
-        Principal = "*"
-        Action    = "s3:GetObject"
-        Resource  = "arn:aws:s3:::my-flutter-app-bucket/flutter-builds/*"
-      }
-    ]
-  })
+resource "aws_s3_bucket_policy" "bucket_policy" {
+  bucket = aws_s3_bucket.my_bucket.bucket
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::my-flutter-app-bucket/flutter-builds/*"
+    }
+  ]
 }
+EOF
+}
+
 
 resource "aws_security_group" "RdsSecurityGroup" {
   name        = var.Rds_security_group_name
