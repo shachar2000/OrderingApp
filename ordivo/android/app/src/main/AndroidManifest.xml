@@ -3,6 +3,10 @@
         android:label="Ordivo"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        
+        <!-- הוספת הרשאת גישה לאינטרנט -->
+        <uses-permission android:name="android.permission.INTERNET" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
