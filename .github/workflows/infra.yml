@@ -34,6 +34,9 @@ jobs:
           db_username=$(grep 'db_username' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}' | sed 's/"//g')
           db_password=$(grep 'db_password' region.eu-north-1.tfvars | awk -F ' = ' '{print $2}' | sed 's/"//g')
           secret_key="${{ secrets.SECRET_KEY }}"
+          echo "::add-mask::$db_name"
+          echo "::add-mask::$db_username"
+          echo "::add-mask::$db_password"
           echo "secret_key=$secret_key" >> $GITHUB_ENV
           echo "db_name=$db_name" >> $GITHUB_ENV
           echo "db_username=$db_username" >> $GITHUB_ENV
@@ -48,6 +51,9 @@ jobs:
           OrderAppServer2_ip=$(terraform output -raw OrderAppServer2_public_ip)
           RdsEndpoint=$(terraform output -raw rds_endpoint)
           RdsEndpoint=$(echo $RdsEndpoint | sed 's/:.*//')
+          echo "::add-mask::$OrderAppServer1_ip"
+          echo "::add-mask::$OrderAppServer2_ip"
+          echo "::add-mask::$RdsEndpoint"
           echo "OrderAppServer1_ip=$OrderAppServer1_ip" >> $GITHUB_ENV
           echo "OrderAppServer2_ip=$OrderAppServer2_ip" >> $GITHUB_ENV
           echo "RdsEndpoint=$RdsEndpoint" >> $GITHUB_ENV
