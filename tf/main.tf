@@ -32,15 +32,15 @@ module "vpc" {
 
 resource "aws_s3_bucket" "my_bucket" {
   bucket = "my-flutter-app-bucket"
-  acl    = "private"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_public_access_block" "my_bucket_public_access_block" {
   bucket = aws_s3_bucket.my_bucket.bucket
 
-  block_public_acls       = false
+  block_public_acls       = true
+  ignore_public_acls      = true
   block_public_policy     = false
-  ignore_public_acls      = false
   restrict_public_buckets = false
 }
 
