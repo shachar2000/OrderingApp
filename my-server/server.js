@@ -5,6 +5,30 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = process.env.SECRET_KEY;
 
+const client = require('prom-client');
+// יצירת אובייקט שמכיל את כל המדדים
+const register = new client.Registry();
+
+// מודד זמן תגובה לכל בקשה
+const httpRequestDurationMicroseconds = new client.Histogram({
+    name: 'http_request_duration_seconds',
+    help: 'משך זמן תגובה לכל נתיב',
+    labelNames: ['method', 'route', 'status_code'],
+    buckets: [0.1, 0.3, 0.5, 1, 2, 5] // מדוד את הבקשות לפי משך זמן בשניות
+});
+
+// רשום את המדד ברשימה
+register.registerMetric(httpRequestDurationMicroseconds);
+
+// ברירת מחדל – שם האפליקציה
+register.setDefaultLabels({
+    app: 'node-api-server'
+});
+
+// אסוף מדדים בסיסיים כמו שימוש בזיכרון, CPU וכו'
+client.collectDefaultMetrics({ register });
+
+
 // התחברות לדטא בייס
 const connection = mysql.createConnection({
     host: process.env.RDS_ENDPOINT,
@@ -23,6 +47,21 @@ connection.connect((err) => {
 });
 
 app.use(express.json()); 
+
+app.use((req, res, next) => {
+    const end = httpRequestDurationMicroseconds.startTimer(); // התחלת מדידה
+
+    res.on('finish', () => {
+        end({
+            route: req.route?.path || req.path, // הנתיב (למשל /login)
+            method: req.method, // GET, POST וכו'
+            status_code: res.statusCode // 200, 401, 500 וכו'
+        });
+    });
+
+    next(); // ממשיך לבקשה עצמה
+});
+
 
 // יצירת טבלאות ב-RDS
 const createUsersTable = `
@@ -66,6 +105,12 @@ connection.query(createOrdersTable, (err, result) => {
 app.get('/', (req, res) => {
     res.send('השרת פועל!');
 });
+
+app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics()); // מחזיר את כל המדדים ל-Prometheus
+});
+
 
 // פונקציית אימות טוקן
 function authenticateToken(req, res, next) {

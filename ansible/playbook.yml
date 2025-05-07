@@ -1,5 +1,5 @@
 ---
-- name: Install and configure Docker with orderappserver container
+- name: Install and configure Docker with orderappserver container and node_exporter
   hosts: OrderAppServer
   become: true
   tasks:
@@ -45,3 +45,29 @@
           RDS_PASSWORD: "{{ lookup('env', 'db_password') }}"
           RDS_NAME: "{{ lookup('env', 'db_name') }}"
           SECRET_KEY: "{{ lookup('env', 'secret_key') }}"
+
+    - name: Download node_exporter tarball
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v1.9.1/node_exporter-1.9.1.linux-amd64.tar.gz"
+        dest: "/tmp/node_exporter-1.9.1.linux-amd64.tar.gz"
+
+    - name: Extract node_exporter
+      unarchive:
+        src: "/tmp/node_exporter-1.9.1.linux-amd64.tar.gz"
+        dest: "/tmp/"
+        remote_src: yes
+
+    - name: Run node_exporter on port 9200
+      command: "/tmp/node_exporter-1.9.1.linux-amd64/node_exporter --web.listen-address=:9200"
+      async: 0
+      become: true
+      daemonize: yes
+      environment:
+        NODE_EXPORTER_HOME: "/tmp/node_exporter-1.9.1.linux-amd64"
+        
+    - name: Verify node_exporter is running
+      wait_for:
+        host: "{{ ansible_host }}"
+        port: 9200
+        timeout: 60
+        state: started

@@ -3,7 +3,7 @@ name: Infrastructures Deployment
 on:
   push:
     branches:
-      - shachar
+      - main
 
 jobs:
   InfraDeployment:
@@ -49,13 +49,16 @@ jobs:
           terraform apply -var-file region.eu-north-1.tfvars -auto-approve
           OrderAppServer1_ip=$(terraform output -raw OrderAppServer1_public_ip)
           OrderAppServer2_ip=$(terraform output -raw OrderAppServer2_public_ip)
+          prometheus_grafana_instance_ip=$(terraform output -raw prometheus_grafana_instance_ip)
           RdsEndpoint=$(terraform output -raw rds_endpoint)
           RdsEndpoint=$(echo $RdsEndpoint | sed 's/:.*//')
           echo "::add-mask::$OrderAppServer1_ip"
           echo "::add-mask::$OrderAppServer2_ip"
+          echo "::add-mask::$prometheus_grafana_instance_ip"
           echo "::add-mask::$RdsEndpoint"
           echo "OrderAppServer1_ip=$OrderAppServer1_ip" >> $GITHUB_ENV
           echo "OrderAppServer2_ip=$OrderAppServer2_ip" >> $GITHUB_ENV
+          echo "prometheus_grafana_instance_ip=$prometheus_grafana_instance_ip" >> $GITHUB_ENV
           echo "RdsEndpoint=$RdsEndpoint" >> $GITHUB_ENV
 
       - name: Create inventory file from output
@@ -82,3 +85,22 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ServerKeyPair.pem ubuntu@$OrderAppServer1_ip "whoami"
           ssh -o StrictHostKeyChecking=no -i ServerKeyPair.pem ubuntu@$OrderAppServer2_ip "whoami"
           ansible-playbook -i inventory.txt --private-key ServerKeyPair.pem playbook.yml
+
+      - name: Replace IPs in prometheus.yml
+        run: |
+          cd prometheus-grafana
+          sed -i "s/node-exporter-1.*/node-exporter-1\n    static_configs:\n      - targets: ['$OrderAppServer1_ip:9200']/" prometheus.yml
+          sed -i "s/node-exporter-2.*/node-exporter-2\n    static_configs:\n      - targets: ['$OrderAppServer2_ip:9200']/" prometheus.yml
+          sed -i "s/orderapp-server.*/orderapp-server\n    static_configs:\n      - targets: ['$OrderAppServer1_ip:3000', '$OrderAppServer2_ip:3000']/" prometheus.yml
+
+      - name: Copy docker-compose.yml to Prometheus-Grafana EC2
+        run: |
+          cd prometheus-grafana
+          scp -o StrictHostKeyChecking=no -i ServerKeyPair.pem docker-compose.yml ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
+          scp -o StrictHostKeyChecking=no -i ServerKeyPair.pem prometheus.yml ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
+      
+      - name: Run Docker Compose on Prometheus-Grafana EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "cd /home/ubuntu/prometheus-grafana && docker-compose up -d"
+
+

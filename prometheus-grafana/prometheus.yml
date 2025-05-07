@@ -1,0 +1,22 @@
+# prom_configurations/prometheus.yml
+
+global:
+  scrape_interval:     15s     # How often Prometheus will scrape targets
+
+scrape_configs:
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: node-exporter-1
+    static_configs:
+      - targets: ['localhost:9200']
+
+  - job_name: node-exporter-2
+    static_configs:
+      - targets: ['localhost:9200']
+
+  - job_name: server.js
+    static_configs:
+      - targets: ['localhost:3000']

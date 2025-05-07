@@ -299,6 +299,88 @@ output "OrderAppServer2_public_ip" {
   sensitive = true
 }
 
+resource "aws_security_group" "prometheus_grafana_sg" {
+  name        = "prometheus_grafana_sg"
+  description = "Security group for Prometheus, Grafana, Node Exporter and SSH access"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 3001
+    to_port     = 3001
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 9200
+    to_port     = 9200
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # אפשר גם להוסיף כאן חוקים לאקספורטרים אחרים אם יש צורך
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # יציאה מהשרת
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "prometheus_grafana_instance" {
+  ami           = var.ami
+  instance_type = var.instance_type
+  key_name      = var.key_name
+  vpc_security_group_ids = [aws_security_group.prometheus_grafana_sg.id]
+  availability_zone      = var.azs[1]
+  subnet_id              = module.vpc.public_subnets[1]
+  associate_public_ip_address = true
+
+  tags = {
+    Name = "Prometheus and Grafana"
+  }
+}
+
+output "prometheus_grafana_instance_ip" {
+  value = aws_instance.prometheus_grafana_instance.public_ip
+}
+
+
 resource "aws_lb_target_group_attachment" "attachment1" {
   target_group_arn = aws_lb_target_group.OrderApp_target_group.arn
   target_id        = aws_instance.OrderAppServer1.id
