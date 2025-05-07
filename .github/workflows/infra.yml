@@ -101,13 +101,29 @@ jobs:
           scp -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem prometheus.yml ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
 
       
-      - name: Run Docker Compose on Prometheus-Grafana EC2
+      - name: Install Docker and Docker Compose on Prometheus-Grafana EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "\
+          # התקנת Docker \
+          sudo apt-get update && \
+          sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common && \
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - && \
+          sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" && \
+          sudo apt-get update && \
+          sudo apt-get install -y docker-ce && \
+          sudo systemctl start docker && \
+          sudo systemctl enable docker && \
+          docker --version && \
+          
+          # התקנת Docker Compose \
           sudo curl -L https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose && \
           sudo chmod +x /usr/local/bin/docker-compose && \
-          docker-compose version && \
-          cd /home/ubuntu/prometheus-grafana && docker-compose up -d"
+          docker-compose --version && \
+          
+          # הרצת docker-compose \
+          cd /home/ubuntu/prometheus-grafana && \
+          docker-compose up -d"
+
 
 
 
