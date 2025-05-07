@@ -106,6 +106,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "\
           cd /home/ubuntu/prometheus-grafana && \
           docker-compose up -d"
+          
 
 
 
