@@ -302,6 +302,7 @@ output "OrderAppServer2_public_ip" {
 resource "aws_security_group" "prometheus_grafana_sg" {
   name        = "prometheus_grafana_sg"
   description = "Security group for Prometheus, Grafana, Node Exporter and SSH access"
+  vpc_id      = module.vpc.vpc_id
 
   ingress {
     from_port   = 22
