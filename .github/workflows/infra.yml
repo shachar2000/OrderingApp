@@ -3,7 +3,7 @@ name: Infrastructures Deployment
 on:
   push:
     branches:
-      - main
+      - shachar
 
 jobs:
   InfraDeployment:
@@ -86,12 +86,15 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ServerKeyPair.pem ubuntu@$OrderAppServer2_ip "whoami"
           ansible-playbook -i inventory.txt --private-key ServerKeyPair.pem playbook.yml
 
-      - name: Replace IPs in prometheus.yml
+      - name: Replace IPs in prometheus.yml using yq
         run: |
-          cd prometheus-grafana
-          sed -i "s/node-exporter-1.*/node-exporter-1\n    static_configs:\n      - targets: ['$OrderAppServer1_ip:9200']/" prometheus.yml
-          sed -i "s/node-exporter-2.*/node-exporter-2\n    static_configs:\n      - targets: ['$OrderAppServer2_ip:9200']/" prometheus.yml
-          sed -i "s/orderapp-server.*/orderapp-server\n    static_configs:\n      - targets: ['$OrderAppServer1_ip:3000', '$OrderAppServer2_ip:3000']/" prometheus.yml
+          cd prom_configurations
+          yq eval '
+            (.scrape_configs[] | select(.job_name == "node-exporter-1") .static_configs) = [{"targets": ["'"$OrderAppServer1_ip"':9200"]}] |
+            (.scrape_configs[] | select(.job_name == "node-exporter-2") .static_configs) = [{"targets": ["'"$OrderAppServer2_ip"':9200"]}] |
+            (.scrape_configs[] | select(.job_name == "server.js") .static_configs) = [{"targets": ["'"$OrderAppServer1_ip"':3000", "'"$OrderAppServer2_ip"':3000"]}]
+          ' -i prometheus.yml
+
 
       - name: Create directory and copy docker-compose.yml to Prometheus-Grafana EC2
         run: |

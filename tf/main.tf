@@ -59,6 +59,11 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
   ]
 }
 EOF
+
+  depends_on = [
+    aws_s3_bucket.my_bucket,
+    aws_s3_bucket_public_access_block.my_bucket_public_access_block
+  ]
 }
 
 

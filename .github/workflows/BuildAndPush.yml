@@ -5,7 +5,7 @@ on:
     paths:
       - 'my-server/**'
     branches:
-      - main
+      - shachar
 
 jobs:
   BuildAndPush:

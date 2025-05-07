@@ -13,7 +13,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3001:3001"  # יצא את הפורט 3000 שזו ה-interface של Grafana
+      - "3001:3000"  # יצא את הפורט 3000 שזו ה-interface של Grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin  # סיסמה למנהל
     depends_on:
