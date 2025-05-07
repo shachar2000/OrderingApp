@@ -93,11 +93,13 @@ jobs:
           sed -i "s/node-exporter-2.*/node-exporter-2\n    static_configs:\n      - targets: ['$OrderAppServer2_ip:9200']/" prometheus.yml
           sed -i "s/orderapp-server.*/orderapp-server\n    static_configs:\n      - targets: ['$OrderAppServer1_ip:3000', '$OrderAppServer2_ip:3000']/" prometheus.yml
 
-      - name: Copy docker-compose.yml to Prometheus-Grafana EC2
+      - name: Create directory and copy docker-compose.yml to Prometheus-Grafana EC2
         run: |
           cd prometheus-grafana
+          ssh -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "mkdir -p /home/ubuntu/prometheus-grafana"
           scp -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem docker-compose.yml ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
           scp -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem prometheus.yml ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
+
       
       - name: Run Docker Compose on Prometheus-Grafana EC2
         run: |
