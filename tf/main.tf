@@ -371,18 +371,42 @@ resource "aws_security_group" "prometheus_grafana_sg" {
 }
 
 resource "aws_instance" "prometheus_grafana_instance" {
-  ami                    = var.ami
-  instance_type          = var.instance_type
-  key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.prometheus_grafana_sg.id]
-  availability_zone      = var.azs[1]
-  subnet_id             = module.vpc.public_subnets[1]
+  ami                         = var.ami
+  instance_type               = var.instance_type
+  key_name                    = var.key_name
+  vpc_security_group_ids      = [aws_security_group.prometheus_grafana_sg.id]
+  availability_zone           = var.azs[1]
+  subnet_id                   = module.vpc.public_subnets[1]
   associate_public_ip_address = true
+
+  user_data = <<-EOF
+    #!/bin/bash
+    # עדכון מערכת והתקנת חבילות נדרשות
+    sudo apt update -y
+    sudo apt install -y apt-transport-https ca-certificates curl software-properties-common jq
+
+    # התקנת Docker
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
+
+    # התקנת Docker Compose
+    latest_compose=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)
+    sudo curl -L "https://github.com/docker/compose/releases/download/${latest_compose}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+
+    # הוספת המשתמש ubuntu לקבוצת docker
+    sudo usermod -aG docker ubuntu
+
+    # הפעלת שירות docker
+    sudo systemctl enable docker
+    sudo systemctl start docker
+  EOF
 
   tags = {
     Name = "Prometheus and Grafana"
   }
 }
+
 
 output "prometheus_grafana_instance_ip" {
   value = aws_instance.prometheus_grafana_instance.public_ip
