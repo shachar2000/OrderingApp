@@ -103,6 +103,6 @@ jobs:
       
       - name: Run Docker Compose on Prometheus-Grafana EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "cd /home/ubuntu/prometheus-grafana && docker-compose up -d"
+          ssh -o StrictHostKeyChecking=no -i ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "cd /home/ubuntu/prometheus-grafana && docker-compose up -d"
 
 
