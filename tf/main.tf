@@ -391,7 +391,7 @@ resource "aws_instance" "prometheus_grafana_instance" {
 
     # התקנת Docker Compose
     latest_compose=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)
-    sudo curl -L "https://github.com/docker/compose/releases/download/${latest_compose}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo curl -L "https://github.com/docker/compose/releases/download/$${latest_compose}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
 
     # הוספת המשתמש ubuntu לקבוצת docker
