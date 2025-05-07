@@ -371,13 +371,33 @@ resource "aws_security_group" "prometheus_grafana_sg" {
 }
 
 resource "aws_instance" "prometheus_grafana_instance" {
-  ami           = var.ami
-  instance_type = var.instance_type
-  key_name      = var.key_name
+  ami                    = var.ami
+  instance_type          = var.instance_type
+  key_name               = var.key_name
   vpc_security_group_ids = [aws_security_group.prometheus_grafana_sg.id]
   availability_zone      = var.azs[1]
-  subnet_id              = module.vpc.public_subnets[1]
+  subnet_id             = module.vpc.public_subnets[1]
   associate_public_ip_address = true
+
+  user_data = <<-EOT
+              #!/bin/bash
+              
+              # התקנת Docker
+              sudo apt-get update -y
+              sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+              sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+              sudo apt-get update -y
+              sudo apt-get install -y docker-ce
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              docker --version
+
+              # התקנת Docker Compose
+              sudo curl -L https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+              docker-compose --version
+              EOT
 
   tags = {
     Name = "Prometheus and Grafana"
