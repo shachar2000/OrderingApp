@@ -57,14 +57,14 @@
         dest: "/tmp/"
         remote_src: yes
 
-    - name: Run node_exporter on port 9200
-      command: "/tmp/node_exporter-1.9.1.linux-amd64/node_exporter --web.listen-address=:9200"
-      async: 0
-      become: true
-      daemonize: yes
+    - name: Run node_exporter on port 9200 in background
+      shell: "nohup /tmp/node_exporter-1.9.1.linux-amd64/node_exporter --web.listen-address=:9200 &"
+      args:
+        chdir: /tmp/node_exporter-1.9.1.linux-amd64
       environment:
         NODE_EXPORTER_HOME: "/tmp/node_exporter-1.9.1.linux-amd64"
-        
+      become: true
+
     - name: Verify node_exporter is running
       wait_for:
         host: "{{ ansible_host }}"
