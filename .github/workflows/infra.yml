@@ -96,8 +96,8 @@ jobs:
       - name: Copy docker-compose.yml to Prometheus-Grafana EC2
         run: |
           cd prometheus-grafana
-          scp -o StrictHostKeyChecking=no -i ServerKeyPair.pem docker-compose.yml ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
-          scp -o StrictHostKeyChecking=no -i ServerKeyPair.pem prometheus.yml ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
+          scp -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem docker-compose.yml ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
+          scp -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem prometheus.yml ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
       
       - name: Run Docker Compose on Prometheus-Grafana EC2
         run: |
