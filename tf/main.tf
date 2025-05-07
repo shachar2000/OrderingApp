@@ -224,6 +224,13 @@ resource "aws_security_group" "instance_sg" {
   vpc_id      = module.vpc.vpc_id
 
   ingress {
+    from_port   = 9200
+    to_port     = 9200
+    protocol    = "tcp"
+    cidr_blocks = var.sg_ingress_cidr_blocks
+  }
+
+  ingress {
     from_port   = var.sg_ingress_ports[0]
     to_port     = var.sg_ingress_ports[0]
     protocol    = "tcp"
