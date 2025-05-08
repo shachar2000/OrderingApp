@@ -67,6 +67,7 @@ EOF
 }
 
 
+
 resource "aws_security_group" "RdsSecurityGroup" {
   name        = var.Rds_security_group_name
   description = "Security group for OrderApp RDS instance"
