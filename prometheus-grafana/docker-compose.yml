@@ -17,8 +17,9 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
-      - ./provisioning:/etc/grafana/provisioning
-      - ./dashboards:/etc/grafana/dashboards
+      - ./provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./provisioning/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
     depends_on:
       - prometheus
     restart: always
