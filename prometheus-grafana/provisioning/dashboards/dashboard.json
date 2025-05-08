@@ -1,0 +1,108 @@
+{
+    "id": null,
+    "uid": null,
+    "title": "Node API Server Metrics",
+    "tags": ["node", "api", "prometheus"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "type": "graph",
+        "title": "HTTP Request Duration (avg per route)",
+        "targets": [
+          {
+            "expr": "rate(http_request_duration_seconds_sum{app=\"node-api-server\"}[1m]) / rate(http_request_duration_seconds_count{app=\"node-api-server\"}[1m])",
+            "legendFormat": "{{route}}",
+            "interval": ""
+          }
+        ],
+        "datasource": "prometheus",
+        "id": 1,
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "type": "stat",
+        "title": "CPU Usage (Total)",
+        "targets": [
+          {
+            "expr": "rate(process_cpu_seconds_total{app=\"node-api-server\"}[1m])",
+            "legendFormat": "CPU Total",
+            "interval": ""
+          }
+        ],
+        "datasource": "prometheus",
+        "id": 2,
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "type": "graph",
+        "title": "Memory Usage (Resident)",
+        "targets": [
+          {
+            "expr": "process_resident_memory_bytes{app=\"node-api-server\"}",
+            "legendFormat": "Resident Memory",
+            "interval": ""
+          }
+        ],
+        "datasource": "prometheus",
+        "id": 3,
+        "gridPos": {
+          "x": 0,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "type": "graph",
+        "title": "Event Loop Lag (mean)",
+        "targets": [
+          {
+            "expr": "nodejs_eventloop_lag_mean_seconds{app=\"node-api-server\"}",
+            "legendFormat": "Mean Lag",
+            "interval": ""
+          }
+        ],
+        "datasource": "prometheus",
+        "id": 4,
+        "gridPos": {
+          "x": 12,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "type": "graph",
+        "title": "GC Duration by Type",
+        "targets": [
+          {
+            "expr": "rate(nodejs_gc_duration_seconds_sum{app=\"node-api-server\"}[5m]) / rate(nodejs_gc_duration_seconds_count{app=\"node-api-server\"}[5m])",
+            "legendFormat": "{{kind}}",
+            "interval": ""
+          }
+        ],
+        "datasource": "prometheus",
+        "id": 5,
+        "gridPos": {
+          "x": 0,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        }
+      }
+    ]
+  }
+  

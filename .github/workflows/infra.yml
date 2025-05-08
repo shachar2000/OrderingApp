@@ -95,13 +95,21 @@ jobs:
             (.scrape_configs[] | select(.job_name == "server.js") .static_configs) = [{"targets": ["'"$OrderAppServer1_ip"':3000", "'"$OrderAppServer2_ip"':3000"]}]
           ' -i prometheus.yml
 
+      - name: Replace Prometheus IP in datasource.yaml using yq
+        run: |
+          cd prometheus-grafana/provisioning/datasources
+          yq eval '
+            .datasources[] | select(.name == "Prometheus") .url = "http://'"$prometheus_grafana_instance_ip"':9090"
+          ' -i datasource.yaml
 
-      - name: Create directory and copy docker-compose.yml to Prometheus-Grafana EC2
+
+
+      - name: Create directory and copy entire prometheus-grafana directory to EC2
         run: |
           cd prometheus-grafana
           ssh -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "mkdir -p /home/ubuntu/prometheus-grafana"
-          scp -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem docker-compose.yml ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
-          scp -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem prometheus.yml ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
+          scp -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem -r . ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
+
 
       
       - name: Run Docker Compose on Prometheus-Grafana EC2
