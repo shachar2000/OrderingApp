@@ -392,7 +392,7 @@ resource "aws_security_group" "prometheus_grafana_sg" {
 
 resource "aws_instance" "prometheus_grafana_instance" {
   ami                         = var.ami
-  instance_type               = var.instance_type
+  instance_type               = "t3.small"
   key_name                    = var.key_name
   vpc_security_group_ids      = [aws_security_group.prometheus_grafana_sg.id]
   availability_zone           = var.azs[1]
