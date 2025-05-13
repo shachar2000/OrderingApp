@@ -13,7 +13,7 @@ const { Client: ElasticClient } = require('@elastic/elasticsearch');
 
 // שמור על http:// ו-:9200, אך שנה את ה-IP מתוך משתנה סביבה
 const esIp = process.env.ELASTICSEARCH_IP || 'localhost'; // ברירת מחדל אם אין IP
-const esUrl = `http://${esIp}:9200`;  // בניית ה-URL עם ה-IP שנלקח מהסביבה
+const esUrl = `http://${esIp}:9201`;  // בניית ה-URL עם ה-IP שנלקח מהסביבה
 
 // יצירת ה-ElasticClient עם ה-URL החדש
 const esClient = new ElasticClient({ node: esUrl });
