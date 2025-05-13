@@ -252,4 +252,3 @@ app.get('/orderlist', authenticateToken, (req, res) => {
 app.listen(3000, '0.0.0.0', () => {
     logger.info('Server is running at http://localhost:3000');
 });
-
