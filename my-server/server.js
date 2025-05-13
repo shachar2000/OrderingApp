@@ -23,6 +23,7 @@ const esTransportOpts = {
     level: 'info',
     client: esClient,
     indexPrefix: 'node-api-logs',
+    ignoreType: true,
 };
 
 const logger = winston.createLogger({
