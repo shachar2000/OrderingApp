@@ -10,8 +10,14 @@ const winston = require('winston');
 const Elasticsearch = require('winston-elasticsearch');
 const { Client: ElasticClient } = require('@elastic/elasticsearch');
 
-// Winston Elasticsearch setup
-const esClient = new ElasticClient({ node: 'http://your-elasticsearch-url:9200' });
+
+// שמור על http:// ו-:9200, אך שנה את ה-IP מתוך משתנה סביבה
+const esIp = process.env.ELASTICSEARCH_IP || 'localhost'; // ברירת מחדל אם אין IP
+const esUrl = `http://${esIp}:9200`;  // בניית ה-URL עם ה-IP שנלקח מהסביבה
+
+// יצירת ה-ElasticClient עם ה-URL החדש
+const esClient = new ElasticClient({ node: esUrl });
+
 
 const esTransportOpts = {
     level: 'info',

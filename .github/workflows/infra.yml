@@ -102,13 +102,23 @@ jobs:
           cd prometheus-grafana
           ssh -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "mkdir -p /home/ubuntu/prometheus-grafana"
           scp -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem -r . ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/prometheus-grafana/
-
-
-      
+          
+      - name: Create directory and copy entire elasticsearch-kibana directory to EC2
+        run: |
+          cd elasticsearch-kibana
+          ssh -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "mkdir -p /home/ubuntu/elasticsearch-kibana"
+          scp -o StrictHostKeyChecking=no -i ../ansible/ServerKeyPair.pem -r . ubuntu@$prometheus_grafana_instance_ip:/home/ubuntu/elasticsearch-kibana/
+    
       - name: Run Docker Compose on Prometheus-Grafana EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "\
           cd /home/ubuntu/prometheus-grafana && \
+          docker-compose up -d"
+
+      - name: Run Docker Compose on elasticsearch-kibana EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "\
+          cd /home/ubuntu/elasticsearch-kibana && \
           docker-compose up -d"
           
 

@@ -359,6 +359,20 @@ resource "aws_security_group" "prometheus_grafana_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 9201
+    to_port     = 9201
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 5601
+    to_port     = 5601
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # אפשר גם להוסיף כאן חוקים לאקספורטרים אחרים אם יש צורך
   ingress {
     from_port   = 3000

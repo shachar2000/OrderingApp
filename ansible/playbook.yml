@@ -45,6 +45,7 @@
           RDS_PASSWORD: "{{ lookup('env', 'db_password') }}"
           RDS_NAME: "{{ lookup('env', 'db_name') }}"
           SECRET_KEY: "{{ lookup('env', 'secret_key') }}"
+          ELASTICSEARCH_IP: "{{ lookup('env', 'prometheus_grafana_instance_ip') }}"
 
     - name: Download node_exporter tarball
       get_url:
