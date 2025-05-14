@@ -30,10 +30,10 @@ const esTransportOpts = {
             settings: { number_of_shards: 1 },
             mappings: {
                 properties: {
-                    '@timestamp': { type: 'date' },
-                    severity: { type: 'keyword' },
-                    message: { type: 'text' },
-                    meta: { type: 'object' }
+                    '@timestamp': { },
+                    severity: { },
+                    message: { },
+                    meta: { }
                 }
             }
         }
