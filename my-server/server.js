@@ -10,20 +10,40 @@ const winston = require('winston');
 const Elasticsearch = require('winston-elasticsearch');
 const { Client: ElasticClient } = require('@elastic/elasticsearch');
 
+const esIp = process.env.ELASTICSEARCH_IP || 'localhost';
+const esUrl = `http://${esIp}:9201`; // פורט ברירת מחדל של ES
 
-// שמור על http:// ו-:9200, אך שנה את ה-IP מתוך משתנה סביבה
-const esIp = process.env.ELASTICSEARCH_IP || 'localhost'; // ברירת מחדל אם אין IP
-const esUrl = `http://${esIp}:9201`;  // בניית ה-URL עם ה-IP שנלקח מהסביבה
-
-// יצירת ה-ElasticClient עם ה-URL החדש
 const esClient = new ElasticClient({ node: esUrl });
-
 
 const esTransportOpts = {
     level: 'info',
     client: esClient,
     indexPrefix: 'node-api-logs',
+    indexSuffixPattern: 'YYYY.MM.DD',
+    flushInterval: 2000,
+    bufferLimit: 100,
+    ensureMappingTemplate: true,
     ignoreType: true,
+    mappingTemplate: {
+        index_patterns: ['node-api-logs-*'],
+        template: {
+            settings: { number_of_shards: 1 },
+            mappings: {
+                properties: {
+                    '@timestamp': { type: 'date' },
+                    severity: { type: 'keyword' },
+                    message: { type: 'text' },
+                    meta: { type: 'object' }
+                }
+            }
+        }
+    },
+    transformer: (logData) => ({
+        '@timestamp': new Date().toISOString(),
+        severity: logData.level,
+        message: logData.message,
+        meta: logData.meta || {}
+    })
 };
 
 const logger = winston.createLogger({
@@ -103,7 +123,7 @@ const createOrdersTable = `
     );
 `;
 
-connection.query(createUsersTable, (err, result) => {
+connection.query(createUsersTable, (err) => {
     if (err) {
         logger.error("Error creating users table: " + err.message);
         throw err;
@@ -111,7 +131,7 @@ connection.query(createUsersTable, (err, result) => {
     logger.info("Users table created or already exists.");
 });
 
-connection.query(createOrdersTable, (err, result) => {
+connection.query(createOrdersTable, (err) => {
     if (err) {
         logger.error("Error creating orders table: " + err.message);
         throw err;
@@ -159,7 +179,7 @@ app.post('/register', (req, res) => {
         connection.query(
             "INSERT INTO users (email, username, password, firstname, lastname) VALUES (?, ?, ?, ?, ?)",
             [email, username, hashedPassword, firstname, lastname],
-            (err, result) => {
+            (err) => {
                 if (err) {
                     logger.error('Registration error: ' + err.message);
                     return res.status(500).json({ message: 'שגיאה בהרשמה', error: err.message });
