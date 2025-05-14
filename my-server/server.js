@@ -3,54 +3,23 @@ const app = express();
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = process.env.SECRET_KEY;
-
 const client = require('prom-client');
 const winston = require('winston');
-const Elasticsearch = require('winston-elasticsearch');
-const { Client: ElasticClient } = require('@elastic/elasticsearch');
+const SECRET_KEY = process.env.SECRET_KEY;
 
-const esIp = process.env.ELASTICSEARCH_IP || 'localhost';
-const esUrl = `http://${esIp}:9201`; // פורט ברירת מחדל של ES
 
-const esClient = new ElasticClient({ node: esUrl });
-
-const esTransportOpts = {
-    level: 'info',
-    client: esClient,
-    indexPrefix: 'node-api-logs',
-    indexSuffixPattern: 'YYYY.MM.DD',
-    flushInterval: 2000,
-    bufferLimit: 100,
-    ensureMappingTemplate: true,
-    ignoreType: true,
-    mappingTemplate: {
-        index_patterns: ['node-api-logs-*'],
-        template: {
-            settings: { number_of_shards: 1 },
-            mappings: {
-                properties: {
-                    '@timestamp': { },
-                    severity: { },
-                    message: { },
-                    meta: { }
-                }
-            }
-        }
-    },
-    transformer: (logData) => ({
-        '@timestamp': new Date().toISOString(),
-        severity: logData.level,
-        message: logData.message,
-        meta: logData.meta || {}
-    })
-};
-
+// Winston logger setup
 const logger = winston.createLogger({
     level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.printf(({ level, message, timestamp }) => {
+            return `[${timestamp}] ${level.toUpperCase()}: ${message}`;
+        })
+    ),
     transports: [
         new winston.transports.Console(),
-        new Elasticsearch.ElasticsearchTransport(esTransportOpts)
+        new winston.transports.File({ filename: 'AppOrderServer.log' })
     ],
 });
 
@@ -82,7 +51,7 @@ connection.connect((err) => {
     logger.info('Connected to RDS as ID ' + connection.threadId);
 });
 
-app.use(express.json()); 
+app.use(express.json());
 
 app.use((req, res, next) => {
     const end = httpRequestDurationMicroseconds.startTimer();
@@ -151,7 +120,7 @@ app.get('/metrics', async (req, res) => {
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    if (token == null) return res.sendStatus(401);
+    if (!token) return res.sendStatus(401);
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
         if (err) return res.sendStatus(403);
@@ -216,7 +185,13 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'שם משתמש, אימייל או סיסמא שגויים!' });
         }
 
-        const token = jwt.sign({ id: user[0].id, email: user[0].email, firstname: user[0].firstname, lastname: user[0].lastname }, SECRET_KEY, { expiresIn: '1h' });
+        const token = jwt.sign({
+            id: user[0].id,
+            email: user[0].email,
+            firstname: user[0].firstname,
+            lastname: user[0].lastname
+        }, SECRET_KEY, { expiresIn: '1h' });
+
         logger.info(`User logged in successfully: ${email}`);
         res.json({ message: '✅ התחברת בהצלחה!', token, firstname: user[0].firstname, lastname: user[0].lastname });
     });
@@ -226,9 +201,9 @@ app.post('/order', authenticateToken, (req, res) => {
     const orderData = req.body;
     const userId = req.user.id;
 
-    let now = new Date();
-    let localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-    let formattedDate = localDate.toISOString().replace('T', ' ').substring(0, 16);
+    const now = new Date();
+    const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    const formattedDate = localDate.toISOString().replace('T', ' ').substring(0, 16);
 
     const query = `
         INSERT INTO orders (computer, laptop, galaxy, iphone, xiaomi, watch, userId, date, price)
