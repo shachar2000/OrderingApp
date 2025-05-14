@@ -3,7 +3,7 @@ name: Infrastructures Deployment
 on:
   push:
     branches:
-      - main
+      - shachar
 
 jobs:
   InfraDeployment:
@@ -125,6 +125,15 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "\
           cd /home/ubuntu/elasticsearch-kibana && \
           docker-compose up -d"
+
+      - name: Wait for Kibana to be ready
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "\
+          until curl -s http://localhost:5601/api/status | grep -q '\"state\":\"green\"'; do
+            echo 'Waiting for Kibana...';
+            sleep 5;
+          done"
+
           
       - name: Import Kibana index pattern
         run: |
