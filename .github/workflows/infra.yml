@@ -130,6 +130,14 @@ jobs:
           cd /home/ubuntu/elasticsearch-kibana && \
           docker-compose up -d"
           
+      - name: Import Kibana index pattern
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "\
+          sleep 20 && \
+          curl -X POST http://localhost:5601/api/saved_objects/_import \
+            -H 'kbn-xsrf: true' \
+            -F file=@/home/ubuntu/elasticsearch-kibana/index-pattern.ndjson"
+
 
 
 
