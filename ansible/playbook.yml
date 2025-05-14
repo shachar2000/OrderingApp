@@ -46,7 +46,7 @@
         published_ports:
           - "3000:3000"
         volumes:
-          - /home/ubuntu/AppOrderServer.log:/app/AppOrderServer.log  # חיבור תיקיית הלוגים בין ה-EC2 לקונטיינר
+          - /home/ubuntu/AppOrderServer.log:/app/AppOrderServer.log
         env:
           RDS_ENDPOINT: "{{ lookup('env', 'RdsEndpoint') }}"
           RDS_USER: "{{ lookup('env', 'db_username') }}"
@@ -117,9 +117,25 @@
         dest: /home/ubuntu/logstash-order-app.conf
         mode: '0644'
 
+    - name: Create systemd service for Logstash Order App
+      copy:
+        dest: /etc/systemd/system/logstash-order.service
+        content: |
+          [Unit]
+          Description=Logstash Order App
+          After=network.target
 
-    - name: Run Logstash with order app config
-      shell: "nohup /usr/share/logstash/bin/logstash -f /home/ubuntu/logstash-order-app.conf &"
-      args:
-        executable: /bin/bash
+          [Service]
+          ExecStart=/usr/share/logstash/bin/logstash -f /home/ubuntu/logstash-order-app.conf
+          Restart=always
+          User=root
 
+          [Install]
+          WantedBy=multi-user.target
+        mode: '0644'
+
+    - name: Reload systemd and enable + start logstash-order service
+      shell: |
+        systemctl daemon-reload
+        systemctl enable logstash-order
+        systemctl restart logstash-order
