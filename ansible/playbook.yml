@@ -110,3 +110,16 @@
         path: /etc/profile
         line: 'export PATH=$PATH:/usr/share/logstash/bin'
         state: present
+
+    - name: Copy Logstash config file
+      copy:
+        src: logstash-order-app.conf
+        dest: /home/ubuntu/logstash-order-app.conf
+        mode: '0644'
+
+
+    - name: Run Logstash with order app config
+      shell: "nohup /usr/share/logstash/bin/logstash -f /home/ubuntu/logstash-order-app.conf &"
+      args:
+        executable: /bin/bash
+
