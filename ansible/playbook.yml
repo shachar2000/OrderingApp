@@ -29,6 +29,12 @@
       pause:
         seconds: 60
 
+    - name: Ensure the log file exists
+      file:
+        path: /home/ubuntu/AppOrderServer.log
+        state: touch
+        mode: '0644'
+
     - name: Run the frontend container
       docker_container:
         name: orderappserver
@@ -39,6 +45,8 @@
           - "3000"
         published_ports:
           - "3000:3000"
+        volumes:
+          - /home/ubuntu/AppOrderServer.log:/app/AppOrderServer.log  # חיבור תיקיית הלוגים בין ה-EC2 לקונטיינר
         env:
           RDS_ENDPOINT: "{{ lookup('env', 'RdsEndpoint') }}"
           RDS_USER: "{{ lookup('env', 'db_username') }}"
@@ -72,3 +80,33 @@
         port: 9200
         timeout: 60
         state: started
+
+    - name: Install Logstash GPG key
+      shell: |
+        curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /usr/share/keyrings/elastic-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/elastic-archive-keyring.gpg
+
+    - name: Add Logstash repository to apt sources
+      shell: |
+        echo "deb [signed-by=/usr/share/keyrings/elastic-archive-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-8.x.list
+      args:
+        creates: /etc/apt/sources.list.d/elastic-8.x.list
+
+    - name: Update apt package index after adding Logstash repo
+      apt:
+        update_cache: yes
+
+    - name: Install Logstash
+      apt:
+        name: logstash
+        state: present
+
+    - name: Verify Logstash installation
+      command: /usr/share/logstash/bin/logstash --version
+
+    - name: Add Logstash to PATH
+      lineinfile:
+        path: /etc/profile
+        line: 'export PATH=$PATH:/usr/share/logstash/bin'
+        state: present
