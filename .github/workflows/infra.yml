@@ -77,6 +77,10 @@ jobs:
           sudo apt install ansible -y
           ansible --version
 
+      - name: Replace Elasticsearch IP in logstash config
+        run: |
+          cd ansible
+          sed -i "s|http://.*:9201/|http://$prometheus_grafana_instance_ip:9201/|g" /home/ubuntu/logstash-order-app.conf
 
       - name: Run Ansible Playbook
         run: |
