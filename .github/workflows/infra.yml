@@ -128,11 +128,15 @@ jobs:
 
       - name: Wait for Kibana to be ready
         run: |
-          ssh -o StrictHostKeyChecking=no -i ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip "\
-          until curl -s http://localhost:5601/api/status | grep -q '\"state\":\"green\"'; do
-            echo 'Waiting for Kibana...';
-            sleep 5;
-          done"
+          ssh -o StrictHostKeyChecking=no -i ansible/ServerKeyPair.pem ubuntu@$prometheus_grafana_instance_ip << 'EOF'
+            echo "Checking Kibana availability on $(hostname)..."
+            until curl -s http://localhost:5601/api/status | grep -q '"level":"available"'; do
+              echo "Waiting for Kibana to become available..."
+              sleep 5
+            done
+            echo "Kibana is available!"
+          EOF
+
 
           
       - name: Import Kibana index pattern
