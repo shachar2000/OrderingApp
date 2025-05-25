@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:ordivo/pages/orders.dart';
 import 'package:ordivo/pages/orderlist.dart';
-import 'classes/loginService.dart';
+import 'package:ordivo/pages/classes/loginService.dart';
 import 'package:ordivo/pages/admin_orders_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:ui' as ui;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     loadUserNameAndAdminStatus();
   }
 
-  Future<void> loadUserNameAndAdminStatus() async { 
+  Future<void> loadUserNameAndAdminStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       firstname = prefs.getString('firstname') ?? '';
@@ -32,78 +33,146 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-    @override
+  @override
   Widget build(BuildContext context) {
-    
     return Directionality(
-      textDirection: TextDirection.rtl, // מימין לשמאל
+      textDirection: ui.TextDirection.rtl, // מימין לשמאל
       child: Scaffold(
         backgroundColor: Colors.grey[200],
         appBar: AppBar(
-          title: Image.asset('assets/bluelogo.png',
-          height: 40,),
+          title: Image.asset(
+            'assets/bluelogo.png',
+            height: 40,
+          ),
           backgroundColor: Colors.blue,
           centerTitle: true,
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.settings, color: Colors.black),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              );
+            },
+          ),
           actions: [
             IconButton(
-              icon: Icon(Icons.logout, color: Colors.black), // אייקון יציאה
+              icon: const Icon(Icons.logout, color: Colors.black),
               onPressed: () {
                 Loginservice.logout(context);
               },
             ),
           ],
         ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Text('שלום $firstname $lastname',
-                  style: TextStyle(
-                    fontSize: 30
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Directionality(
+                  textDirection: ui.TextDirection.rtl,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.person, color: Colors.white, size: 50),
+                      const SizedBox(height: 10),
+                      Text(
+                        'שלום, $firstname $lastname',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
                   ),
                 ),
-            Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => Orders(),));
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  textStyle: const TextStyle(fontSize: 18),
-                  backgroundColor: Colors.blue
-                ),
-                child: const Text('בצע הזמנה'),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => Orderlist(),));
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  textStyle: const TextStyle(fontSize: 18),
-                  backgroundColor: Colors.blue
+
+              if (_isAdmin)
+                ListTile(
+                  title: const Text(
+                    'ניהול הזמנות',
+                    style: TextStyle(fontSize: 18, color: Colors.black87),
+                    textAlign: TextAlign.right,
+                  ),
+                  trailing: const Icon(Icons.manage_accounts, color: Colors.blue),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminOrdersListScreen()));
+                  },
                 ),
-                child: const Text('הזמנות קודמות'),
+              ListTile(
+                title: const Text(
+                  'אודות',
+                  style: TextStyle(fontSize: 18, color: Colors.black87),
+                  textAlign: TextAlign.right,
+                ),
+                trailing: const Icon(Icons.info, color: Colors.grey),
+                onTap: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('מסך אודות (טרם מומש)')),
+                  );
+                },
+              ),
+              const Divider(),
+              ListTile(
+                title: const Text(
+                  'התנתק',
+                  style: TextStyle(fontSize: 18, color: Colors.red),
+                  textAlign: TextAlign.right,
+                ),
+                trailing: const Icon(Icons.logout, color: Colors.red),
+                onTap: () {
+                  Navigator.pop(context);
+                  Loginservice.logout(context);
+                },
               ),
             ],
           ),
-          if (_isAdmin) // הצג את הכפתור הזה רק אם המשתמש הוא מנהל
-            Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: ElevatedButton(
-                    onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => AdminOrdersListScreen()));
-                    },
-                    style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                        textStyle: const TextStyle(fontSize: 18),
-                        backgroundColor: Colors.blue, // צבע שונה לכפתור מנהל
-                    ),
-                    child: const Text('ניהול הזמנות (מנהל)'),
-                ),
+        ),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Text(
+              'שלום $firstname $lastname',
+              style: const TextStyle(fontSize: 30),
             ),
-          ]
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Orders()));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    textStyle: const TextStyle(fontSize: 18),
+                    backgroundColor: Colors.blue,
+                  ),
+                  child: const Text('בצע הזמנה'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Orderlist()));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    textStyle: const TextStyle(fontSize: 18),
+                    backgroundColor: Colors.blue,
+                  ),
+                  child: const Text('הזמנות קודמות'),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

@@ -47,23 +47,23 @@ class _AdminOrdersListScreenState extends State<AdminOrdersListScreen> {
       _isLoading = true;
     });
 
-    String url = 'https://shachar.online:3000/admin/all_orders';
-    Map<String, String> queryParams = {};
-
+    Map<String, String> queryParameters = {}; // נשנה את השם כדי למנוע בלבול
     if (_startDate != null) {
-      queryParams['startDate'] = DateFormat('yyyy-MM-dd').format(_startDate!);
+      queryParameters['startDate'] = DateFormat('yyyy-MM-dd').format(_startDate!);
     }
     if (_endDate != null) {
-      queryParams['endDate'] = DateFormat('yyyy-MM-dd').format(_endDate!);
+      queryParameters['endDate'] = DateFormat('yyyy-MM-dd').format(_endDate!);
     }
 
-    if (queryParams.isNotEmpty) {
-      url += '?' + Uri.encodeQueryComponent(queryParams.entries.map((e) => '${e.key}=${e.value}').join('&'));
-    }
+    final Uri uri = Uri.https(
+      'shachar.online:3000', // Host and port
+      '/admin/all_orders',   // Path
+      queryParameters.isNotEmpty ? queryParameters : null, // Pass the map here
+    );
 
     try {
       final response = await http.get(
-        Uri.parse(url),
+        uri, // השתמש באובייקט ה-Uri שבנינו
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -76,8 +76,8 @@ class _AdminOrdersListScreenState extends State<AdminOrdersListScreen> {
           allOrders = List<Map<String, dynamic>>.from(data);
           _isLoading = false;
         });
+        print('Orders fetched successfully: ${allOrders.length} orders'); // הדפסה לבדיקה
       } else {
-        // Handle unauthorized or other errors
         print("Failed to load all orders: ${response.statusCode} ${response.body}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to load orders: ${jsonDecode(response.body)['message'] ?? response.body}')),
@@ -112,8 +112,38 @@ class _AdminOrdersListScreenState extends State<AdminOrdersListScreen> {
           _endDate = picked;
         }
       });
-      fetchAllOrders(); // Fetch orders again with new date filters
+      fetchAllOrders();
     }
+  }
+
+  Widget _buildDateButton(BuildContext context, {required bool isStartDate, DateTime? date, required String label}) {
+    return ElevatedButton(
+      onPressed: () => _selectDate(context, isStartDate: isStartDate),
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.black, backgroundColor: Colors.white, // צבע טקסט ורקע
+        elevation: 2, // צל קטן
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8), // פינות מעוגלות
+          side: const BorderSide(color: Colors.grey, width: 0.5), // מסגרת דקה
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // כדי שהטקסט והאייקון יהיו בקצוות
+        textDirection: ui.TextDirection.rtl, // כיוון טקסט מימין לשמאל בתוך הכפתור
+        children: [
+          Icon(Icons.calendar_today, size: 20, color: Colors.blue[700]), // אייקון קלנדר
+          const SizedBox(width: 8),
+          Expanded( // כדי שהטקסט יתפרס
+            child: Text(
+              date == null ? label : '$label ${DateFormat('dd/MM/yyyy').format(date)}',
+              textAlign: TextAlign.right, // יישור לימין
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -129,27 +159,49 @@ class _AdminOrdersListScreenState extends State<AdminOrdersListScreen> {
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Column( // 💡 שינוי: מעבר מ-Row ל-Column עבור פריסת התאריכים
                 children: [
-                  ElevatedButton(
-                    onPressed: () => _selectDate(context, isStartDate: true),
-                    child: Text(_startDate == null ? 'בחר תאריך התחלה' : 'החל מ: ${DateFormat('dd/MM/yyyy').format(_startDate!)}'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // 💡 שינוי: ריווח בין האלמנטים
+                    children: [
+                      Expanded( // 💡 שינוי: כפתור שימלא את השטח
+                        child: _buildDateButton(
+                          context,
+                          isStartDate: true,
+                          date: _startDate,
+                          label: 'תאריך התחלה:',
+                        ),
+                      ),
+                      const SizedBox(width: 10), // מרווח קטן בין הכפתורים
+                      Expanded( // 💡 שינוי: כפתור שימלא את השטח
+                        child: _buildDateButton(
+                          context,
+                          isStartDate: false,
+                          date: _endDate,
+                          label: 'תאריך סיום:',
+                        ),
+                      ),
+                    ],
                   ),
-                  ElevatedButton(
-                    onPressed: () => _selectDate(context, isStartDate: false),
-                    child: Text(_endDate == null ? 'בחר תאריך סיום' : 'עד: ${DateFormat('dd/MM/yyyy').format(_endDate!)}'),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() {
-                        _startDate = null;
-                        _endDate = null;
-                      });
-                      fetchAllOrders(); // Clear filters and fetch all orders
-                    },
+                  const SizedBox(height: 10), // מרווח בין שורת התאריכים לכפתור האיפוס
+                  Align(
+                    alignment: Alignment.centerLeft, // מניח את כפתור האיפוס בצד שמאל (ימין ב-RTL)
+                    child: TextButton.icon( // 💡 שינוי: שימוש ב-TextButton.icon לאיפוס
+                      onPressed: () {
+                        setState(() {
+                          _startDate = null;
+                          _endDate = null;
+                        });
+                        fetchAllOrders(); // Clear filters and fetch all orders
+                      },
+                      icon: const Icon(Icons.clear_all, color: Colors.red), // אייקון יותר ברור
+                      label: const Text('נקה סינון תאריכים', style: TextStyle(color: Colors.red)), // טקסט ברור יותר
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero, // כדי למנוע ריפוד מיותר
+                        alignment: Alignment.centerRight, // יישור לימין של הכפתור עצמו
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -162,36 +214,59 @@ class _AdminOrdersListScreenState extends State<AdminOrdersListScreen> {
                       itemBuilder: (context, index) {
                         final order = allOrders[index];
                         return Card(
-                          margin: const EdgeInsets.all(8.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'הזמנה מ: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(order['date']).toLocal())}',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                ),
-                                Text.rich(
-                                  TextSpan(
-                                    text: 'מזמין: ',
-                                    style: const TextStyle(fontWeight: FontWeight.bold), // הדגש את "מזמין:"
-                                    children: [
-                                      TextSpan(
-                                        text: '${order['firstname']} ${order['lastname']} (${order['username']})',
-                                        style: const TextStyle(fontWeight: FontWeight.normal), // שאר הטקסט רגיל
-                                      ),
-                                    ],
+                          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () {
+                              print('Order ${order['id']} tapped!');
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end, // זה בסדר, מיישר את הילדים לעמודה לימין
+                                children: [
+                                  // 💡 שינוי כאן: ליישר את תאריך ההזמנה לימין
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      'הזמנה מ: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(order['date']).toLocal())}',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                ..._buildOrderItems(order), // Helper to build product list
-                                const Divider(),
-                                Text(
-                                  'סה"כ: ₪${double.tryParse(order['price'].toString())?.toStringAsFixed(2) ?? order['price'].toString()}',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green),
-                                ),
-                              ],
+                                  const SizedBox(height: 4),
+                                  // 💡 שינוי כאן: ליישר את פרטי המזמין לימין
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text.rich(
+                                      TextSpan(
+                                        text: 'מזמין: ',
+                                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+                                        children: [
+                                          TextSpan(
+                                            text: '${order['firstname']} ${order['lastname']} (${order['username']})',
+                                            style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black87),
+                                          ),
+                                        ],
+                                      ),
+                                      // אין צורך ב-textAlign כאן כי Align כבר עושה את העבודה
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  // 💡 ודא שגם זה מיושר לימין - כבר סידרנו את זה ב-_buildOrderItems
+                                  ..._buildOrderItems(order),
+                                  const Divider(height: 24, thickness: 1, color: Colors.grey),
+                                  // סכום כולל כבר מיושר לימין
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      'סה"כ: ₪${double.tryParse(order['price'].toString())?.toStringAsFixed(2) ?? order['price'].toString()}',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 19, color: Colors.green),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         );
@@ -220,16 +295,20 @@ class _AdminOrdersListScreenState extends State<AdminOrdersListScreen> {
 
       if (productQuantity > 0) {
         items.add(
-          Text.rich( // 💡 שינוי כאן: שימוש ב-Text.rich כדי להדגיש את שם המוצר
-            TextSpan(
-              text: '$value: ', // שם המוצר עם נקודתיים
-              style: const TextStyle(fontWeight: FontWeight.bold), // הדגש את שם המוצר
-              children: [
-                TextSpan(
-                  text: '${productQuantity} יח\'', // הכמות רגילה
-                  style: const TextStyle(fontWeight: FontWeight.normal),
-                ),
-              ],
+          Align( // 💡 הוסף את ה-Align כאן!
+            alignment: Alignment.centerRight, // יישר את השורה לימין
+            child: Text.rich(
+              TextSpan(
+                text: '$value: ',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                children: [
+                  TextSpan(
+                    text: '${productQuantity} יח\'',
+                    style: const TextStyle(fontWeight: FontWeight.normal),
+                  ),
+                ],
+              ),
+              // אין צורך ב-textAlign: TextAlign.right כאן. ה-Align מטפל בזה.
             ),
           ),
         );
