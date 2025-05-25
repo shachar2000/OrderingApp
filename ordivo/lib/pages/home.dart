@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ordivo/pages/orders.dart';
 import 'package:ordivo/pages/orderlist.dart';
 import 'classes/loginService.dart';
+import 'package:ordivo/pages/admin_orders_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -14,18 +15,20 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String firstname = '';
   String lastname = '';
+  bool _isAdmin = false;
 
   @override
   void initState() {
     super.initState();
-    loadUserName();
+    loadUserNameAndAdminStatus();
   }
 
-  Future<void> loadUserName() async {
+  Future<void> loadUserNameAndAdminStatus() async { 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       firstname = prefs.getString('firstname') ?? '';
       lastname = prefs.getString('lastname') ?? '';
+      _isAdmin = prefs.getBool('is_admin') ?? false;
     });
   }
 
@@ -85,6 +88,21 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+          if (_isAdmin) // הצג את הכפתור הזה רק אם המשתמש הוא מנהל
+            Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: ElevatedButton(
+                    onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => AdminOrdersListScreen()));
+                    },
+                    style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                        textStyle: const TextStyle(fontSize: 18),
+                        backgroundColor: Colors.redAccent, // צבע שונה לכפתור מנהל
+                    ),
+                    child: const Text('ניהול הזמנות (מנהל)'),
+                ),
+            ),
           ]
         ),
       ),

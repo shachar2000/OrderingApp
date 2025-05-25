@@ -21,7 +21,8 @@ class Loginservice {
       String token = data['token'];
       String firstname = data['firstname'];
       String lastname = data['lastname'];
-      await saveToken(token, firstname, lastname);
+      bool isAdmin = data['is_admin'] ?? false;
+      await saveToken(token, firstname, lastname, isAdmin);
       showSnackbar(context, data['message'], Colors.green);
       // מעבר לעמוד הבית לאחר התחברות מוצלחת
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomeScreen()));
@@ -30,12 +31,12 @@ class Loginservice {
     }
   }
 
-  static Future<void> saveToken(String token, String firstname, String lastname) async {
+  static Future<void> saveToken(String token, String firstname, String lastname, bool isAdmin) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);
     await prefs.setString('firstname', firstname);
     await prefs.setString('lastname', lastname);
-
+    await prefs.setBool('is_admin', isAdmin);
   }
   
   static void showSnackbar(BuildContext context, String message, Color color) {

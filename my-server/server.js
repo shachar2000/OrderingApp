@@ -72,7 +72,8 @@ const createUsersTable = `
         username VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         firstname VARCHAR(255) NOT NULL,
-        lastname VARCHAR(255) NOT NULL
+        lastname VARCHAR(255) NOT NULL,
+        is_admin BOOLEAN DEFAULT FALSE
     );
 `;
 
@@ -127,6 +128,15 @@ function authenticateToken(req, res, next) {
         req.user = user;
         next();
     });
+}
+
+// Middleware חדש לבדיקת הרשאת מנהל
+function authorizeAdmin(req, res, next) {
+    if (!req.user || !req.user.is_admin) {
+        logger.warn(`Access denied for user ID ${req.user ? req.user.id : 'N/A'}: Admin privileges required.`);
+        return res.status(403).json({ message: 'גישה נדחתה. נדרשת הרשאת מנהל.' });
+    }
+    next();
 }
 
 app.post('/register', (req, res) => {
@@ -189,11 +199,12 @@ app.post('/login', async (req, res) => {
             id: user[0].id,
             email: user[0].email,
             firstname: user[0].firstname,
-            lastname: user[0].lastname
+            lastname: user[0].lastname,
+            is_admin: user[0].is_admin
         }, SECRET_KEY, { expiresIn: '1h' });
 
         logger.info(`User logged in successfully: ${email}`);
-        res.json({ message: '✅ התחברת בהצלחה!', token, firstname: user[0].firstname, lastname: user[0].lastname });
+        res.json({ message: '✅ התחברת בהצלחה!', token, firstname: user[0].firstname, lastname: user[0].lastname, is_admin: user[0].is_admin });
     });
 });
 
@@ -241,6 +252,36 @@ app.get('/orderlist', authenticateToken, (req, res) => {
             return;
         }
         logger.info(`Fetched order list for user ID: ${userId}`);
+        res.json(rows);
+    });
+});
+
+app.get('/admin/all_orders', authenticateToken, authorizeAdmin, (req, res) => {
+    const { startDate, endDate } = req.query; // הוספנו אפשרות לקבלת תאריכי סינון מה-query string
+
+    let query = "SELECT orders.*, users.username, users.firstname, users.lastname FROM orders JOIN users ON orders.userId = users.id";
+    const queryParams = [];
+
+    // בניית תנאי WHERE לסינון לפי תאריכים
+    if (startDate && endDate) {
+        query += " WHERE orders.date BETWEEN ? AND ?";
+        queryParams.push(startDate, endDate);
+    } else if (startDate) {
+        query += " WHERE orders.date >= ?";
+        queryParams.push(startDate);
+    } else if (endDate) {
+        query += " WHERE orders.date <= ?";
+        queryParams.push(endDate);
+    }
+
+    query += " ORDER BY orders.date DESC";
+
+    connection.query(query, queryParams, (err, rows) => {
+        if (err) {
+            logger.error("Error fetching all orders for admin: " + err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        logger.info("Admin fetched all orders successfully.");
         res.json(rows);
     });
 });
