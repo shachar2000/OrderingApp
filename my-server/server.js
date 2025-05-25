@@ -257,7 +257,11 @@ app.get('/orderlist', authenticateToken, (req, res) => {
 });
 
 app.get('/admin/all_orders', authenticateToken, authorizeAdmin, (req, res) => {
-    const { startDate, endDate } = req.query; // הוספנו אפשרות לקבלת תאריכי סינון מה-query string
+    const { startDate, endDate } = req.query;
+
+    // 💡 הדפס את מה שהשרת מקבל מהאפליקציה!
+    console.log('Received startDate from Flutter:', startDate);
+    console.log('Received endDate from Flutter:', endDate);
 
     let query = "SELECT orders.*, users.username, users.firstname, users.lastname FROM orders JOIN users ON orders.userId = users.id";
     const queryParams = [];
@@ -265,23 +269,30 @@ app.get('/admin/all_orders', authenticateToken, authorizeAdmin, (req, res) => {
     // בניית תנאי WHERE לסינון לפי תאריכים
     if (startDate && endDate) {
         query += " WHERE orders.date BETWEEN ? AND ?";
-        queryParams.push(startDate, endDate);
+        queryParams.push(startDate + ' 00:00:00');
+        queryParams.push(endDate + ' 23:59:59');
     } else if (startDate) {
         query += " WHERE orders.date >= ?";
-        queryParams.push(startDate);
+        queryParams.push(startDate + ' 00:00:00'); // תחילת היום הנבחר
     } else if (endDate) {
         query += " WHERE orders.date <= ?";
-        queryParams.push(endDate);
+        queryParams.push(endDate + ' 23:59:59'); // סוף היום הנבחר
     }
 
     query += " ORDER BY orders.date DESC";
+
+    // 💡 הדפס את השאילתה המלאה והפרמטרים לפני ביצוע השאילתה
+    console.log('SQL Query being executed:', query);
+    console.log('SQL Query Parameters:', queryParams);
 
     connection.query(query, queryParams, (err, rows) => {
         if (err) {
             logger.error("Error fetching all orders for admin: " + err.message);
             return res.status(500).json({ error: err.message });
         }
-        logger.info("Admin fetched all orders successfully.");
+        logger.info(`Admin fetched ${rows.length} orders successfully.`);
+        // 💡 הדפס את מספר התוצאות שהוחזרו
+        console.log('Number of orders returned by query:', rows.length);
         res.json(rows);
     });
 });

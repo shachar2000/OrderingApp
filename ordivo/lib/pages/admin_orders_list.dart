@@ -169,10 +169,21 @@ class _AdminOrdersListScreenState extends State<AdminOrdersListScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'הזמנה מ: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(order['date']))}',
+                                  'הזמנה מ: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(order['date']).toLocal())}',
                                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                 ),
-                                Text('מזמין: ${order['firstname']} ${order['lastname']} (${order['username']})'),
+                                Text.rich(
+                                  TextSpan(
+                                    text: 'מזמין: ',
+                                    style: const TextStyle(fontWeight: FontWeight.bold), // הדגש את "מזמין:"
+                                    children: [
+                                      TextSpan(
+                                        text: '${order['firstname']} ${order['lastname']} (${order['username']})',
+                                        style: const TextStyle(fontWeight: FontWeight.normal), // שאר הטקסט רגיל
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 const SizedBox(height: 8),
                                 ..._buildOrderItems(order), // Helper to build product list
                                 const Divider(),
@@ -205,8 +216,23 @@ class _AdminOrdersListScreenState extends State<AdminOrdersListScreen> {
     };
 
     productNames.forEach((key, value) {
-      if (order.containsKey(key) && order[key] > 0) {
-        items.add(Text('${value}: ${order[key]} יח\''));
+      final productQuantity = int.tryParse(order[key]?.toString() ?? '0') ?? 0;
+
+      if (productQuantity > 0) {
+        items.add(
+          Text.rich( // 💡 שינוי כאן: שימוש ב-Text.rich כדי להדגיש את שם המוצר
+            TextSpan(
+              text: '$value: ', // שם המוצר עם נקודתיים
+              style: const TextStyle(fontWeight: FontWeight.bold), // הדגש את שם המוצר
+              children: [
+                TextSpan(
+                  text: '${productQuantity} יח\'', // הכמות רגילה
+                  style: const TextStyle(fontWeight: FontWeight.normal),
+                ),
+              ],
+            ),
+          ),
+        );
       }
     });
     return items;

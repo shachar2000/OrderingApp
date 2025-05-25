@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                         textStyle: const TextStyle(fontSize: 18),
-                        backgroundColor: Colors.redAccent, // צבע שונה לכפתור מנהל
+                        backgroundColor: Colors.blue, // צבע שונה לכפתור מנהל
                     ),
                     child: const Text('ניהול הזמנות (מנהל)'),
                 ),

@@ -21,7 +21,7 @@ class Loginservice {
       String token = data['token'];
       String firstname = data['firstname'];
       String lastname = data['lastname'];
-      bool isAdmin = data['is_admin'] ?? false;
+      bool isAdmin = (data['is_admin'] == 1 || data['is_admin'] == true);
       await saveToken(token, firstname, lastname, isAdmin);
       showSnackbar(context, data['message'], Colors.green);
       // מעבר לעמוד הבית לאחר התחברות מוצלחת
