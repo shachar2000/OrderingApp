@@ -2,6 +2,8 @@
 
 A Node.js RESTful API server using Express, MySQL, JWT authentication, bcrypt for password hashing, Winston for logging, and Prometheus for monitoring. This server allows users to register, log in, and place orders for various products and view them. Admin users can view all orders from all users with optional date filters.
 
+---
+
 ## Features
 
 - 📦 User registration and login with JWT authentication
