@@ -39,8 +39,8 @@ The configuration relies on the following variables (you should define them in a
   `Rds_security_group_name`, `Rds_port`, `Rds_ingress_cidr_blocks`, `Rds_egress_cidr_blocks`, `db_subnet_group_name`, `db_instance_identifier`, `db_name`, `db_username`, `db_password`, `allocated_storage`, `storage_type`, `engine`, `engine_version`, `instance_class`, `parameter_group_name`, `multi_az`, `publicly_accessible`, `skip_final_snapshot`
 - ALB related variables:  
 `alb_sg_name`, `alb_ingress_ports`, `alb_ingress_cidr_blocks`, `alb_egress_cidr_blocks`, `alb_name`, `alb_internal`, `alb_load_balancer_type`, `target_group_name`, `target_group_port`, `target_group_protocol`, `lb_listener_port`, `lb_listener_protocol`, `ssl_policy`, `domain_name`, `subject_alternative_names`
-- EC2 related variables such as `EC2_sg_name`, `ami`, `instance_type`, `key_name`, `sg_ingress_cidr_blocks`, `sg_ingress_ports`, `sg_egress_cidr_blocks`, `instance_name`
-- Any other variables used in the script
+- EC2 related variables:  
+`EC2_sg_name`, `ami`, `instance_type`, `key_name`, `sg_ingress_cidr_blocks`, `sg_ingress_ports`, `sg_egress_cidr_blocks`, `instance_name`
 
 ---
 
@@ -54,16 +54,16 @@ The configuration relies on the following variables (you should define them in a
 2. **Check the execution plan:**
 
    ```bash
-   terraform plan -var-file="terraform.tfvars"
+   terraform plan -var-file path/to/terraform.tfvars
 
 2. **Apply the configuration:**
 
    ```bash
-   terraform apply -var-file="terraform.tfvars"
+   terraform apply -var-file path/to/terraform.tfvars
 
 
 2. **Destroy the infrastructure:**
 
    ```bash
-   terraform destroy -var-file="terraform.tfvars"
+   terraform destroy -var-file path/to/terraform.tfvars
 
