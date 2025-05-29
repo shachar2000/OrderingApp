@@ -4,9 +4,9 @@ This Docker Compose file sets up **Prometheus** for monitoring and **Grafana** f
 
 ---
 
-## 📦 Services
+## Services
 
-### 🔍 Prometheus
+### Prometheus
 
 - **Image**: `prom/prometheus:latest`
 - **Port**: `9090`
@@ -14,7 +14,7 @@ This Docker Compose file sets up **Prometheus** for monitoring and **Grafana** f
 - **Container Name**: `prometheus`
 - **Restart Policy**: Always restarts on failure or reboot
 
-### 📊 Grafana
+### Grafana
 
 - **Image**: `grafana/grafana:latest`
 - **Port**: Maps internal port `3000` to host port `3001`
@@ -30,15 +30,19 @@ This Docker Compose file sets up **Prometheus** for monitoring and **Grafana** f
 
 ---
 
-## 📁 Directory Structure
+## How to Use
 
-```plaintext
-.
-├── docker-compose.yml
-├── prometheus.yml
-└── provisioning/
-    ├── datasources/
-    │   └── prometheus.yml
-    ├── dashboards/
-    │   └── your-dashboard.json
-    └── dashboard.yaml
+1. **Run the Stack:**
+
+   ```bash
+   docker-compose up -d
+
+2. **Verify the prumeteus is running:**
+
+   ```bash
+   http://localhost:9090
+
+3. **Verify the grafana is running:**
+
+   ```bash
+   http://localhost:3001

@@ -56,12 +56,12 @@ The configuration relies on the following variables (you should define them in a
    ```bash
    terraform plan -var-file path/to/terraform.tfvars
 
-2. **Apply the configuration:**
+3. **Apply the configuration:**
 
    ```bash
    terraform apply -var-file path/to/terraform.tfvars
 
-2. **Destroy the infrastructure:**
+4. **Destroy the infrastructure:**
 
    ```bash
    terraform destroy -var-file path/to/terraform.tfvars

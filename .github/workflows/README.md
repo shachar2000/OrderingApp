@@ -122,8 +122,8 @@ target_group_port     = 3000
 target_group_protocol = \"HTTP\"
 
 # aws_acm_certificate variables
-domain_name               = \"shachar.online\"
-subject_alternative_names = [\"*.shachar.online\"]
+domain_name               = \"your-domain-name\"
+subject_alternative_names = [\"*.your-domain-name\"]
 
 # aws_lb_listener variables
 lb_listener_port     = 3000
@@ -139,5 +139,5 @@ sg_egress_cidr_blocks  = [\"0.0.0.0/0\"]
 # aws_instance variables
 ami           = \"ami-0c1ac8a41498c1a9c\"
 instance_type = \"t3.medium\"
-key_name      = \"ServerKeyPair\"
+key_name      = \"your-key-name\"
 instance_name = \"AppOrderServer\"

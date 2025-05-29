@@ -28,3 +28,19 @@ db_password=
 db_name=
 secret_key=
 prometheus_grafana_instance_ip=
+```
+
+---
+
+## How to Use
+
+1. **Create inventory.txt:**
+
+   ```bash
+   cd ansible
+   touch inventory.txt
+
+2. **Run Playbook:**
+
+   ```bash
+   ansible-playbook -i path/to/inventory.txt --private-key path/to/ServerKeyPair.pem playbook.yml
