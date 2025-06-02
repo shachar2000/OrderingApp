@@ -61,9 +61,9 @@ To run the project, set the following secrets in your GitHub repository settings
 - `AWS_ACCESS_KEY_ID`  
 - `AWS_SECRET_ACCESS_KEY`  
 - `AWS_SECRET_REGION`  
-- `TFVARS_SECRET`  
-- `SECRET_KEY`  
-- `KEY_PEM`  
+- `TFVARS_SECRET`  (example on .github/woekflow README.md)
+- `SECRET_KEY` (secret key used to sign and verify JWT tokens for authentication)
+- `KEY_PEM`  (your instans key pair from aws)
 
 Additionally, ensure you have a valid Hosted Zone with an active domain configured in AWS Route 53 to allow the system to operate with the correct domain.
 
@@ -73,7 +73,7 @@ Additionally, ensure you have a valid Hosted Zone with an active domain configur
 
 1. **Clone the repository:**  
 ```bash
-git clone https://github.com/yourusername/OrderApp.git
+git clone https://github.com/shachar2000/OrderingApp.git
 cd OrderApp
 ```
 
