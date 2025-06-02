@@ -61,9 +61,9 @@ To run the project, set the following secrets in your GitHub repository settings
 - `AWS_ACCESS_KEY_ID`  
 - `AWS_SECRET_ACCESS_KEY`  
 - `AWS_SECRET_REGION`  
-- `TFVARS_SECRET`  (example on .github/woekflow README.md)
+- `TFVARS_SECRET`  (example in .github/workflows/README.md)
 - `SECRET_KEY` (secret key used to sign and verify JWT tokens for authentication)
-- `KEY_PEM`  (your instans key pair from aws)
+- `KEY_PEM`  (your instance key pair from AWS)
 
 Additionally, ensure you have a valid Hosted Zone with an active domain configured in AWS Route 53 to allow the system to operate with the correct domain.
 
@@ -77,11 +77,10 @@ git clone https://github.com/shachar2000/OrderingApp.git
 cd OrderApp
 ```
 
-2. **Make sure all required environment variables and secrets are configured in GitHub:**  
+2. Make sure all required environment variables and secrets are configured in GitHub, and that a valid Hosted Zone with an active domain is set up in AWS Route 53.
 
-3. **Make sure you have a valid Hosted Zone and domain configured in AWS Route 53:**
 
-4. **Commit and push your changes to the main branch:**  
+3. **Commit and push your changes to the main branch:**  
 ```bash
 git add .
 git commit -m "Your commit message"
