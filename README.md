@@ -77,7 +77,7 @@ git clone https://github.com/shachar2000/OrderingApp.git
 cd OrderApp
 ```
 
-2. Make sure all required environment variables and secrets are configured in GitHub, and that a valid Hosted Zone with an active domain is set up in AWS Route 53.
+2. **Make sure all required environment variables and secrets are configured in GitHub, and that a valid Hosted Zone with an active domain is set up in AWS Route 53.**
 
 
 3. **Commit and push your changes to the main branch:**  
